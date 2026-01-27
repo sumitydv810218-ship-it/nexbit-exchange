@@ -75,6 +75,30 @@ footer {
   <button>Sell Crypto</button>
 </div>
 
+<!-- 🔥 TRADINGVIEW CHART START -->
+<div style="height:500px; margin:30px;">
+  <div id="tradingview_chart" style="height:100%;"></div>
+</div>
+
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
+  new TradingView.widget({
+    "autosize": true,
+    "symbol": "BINANCE:BTCUSDT",
+    "interval": "15",
+    "timezone": "Asia/Kolkata",
+    "theme": "dark",
+    "style": "1",
+    "locale": "en",
+    "toolbar_bg": "#0b1220",
+    "enable_publishing": false,
+    "hide_side_toolbar": false,
+    "allow_symbol_change": true,
+    "container_id": "tradingview_chart"
+  });
+</script>
+<!-- 🔥 TRADINGVIEW CHART END -->
+
 <div class="section">
   <div class="card">✔ Secure Trading</div>
   <div class="card">✔ INR & Crypto Support</div>
@@ -85,27 +109,5 @@ footer {
   © 2026 Nexbit Exchange
 </footer>
 
-<!-- 🔽 Firebase config BODY ke end me -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
-    authDomain: "nexbit-exchange.firebaseapp.com",
-    projectId: "nexbit-exchange",
-    storageBucket: "nexbit-exchange.firebasestorage.app",
-    messagingSenderId: "944018123673",
-    appId: "1:944018123673:web:08a769c6e6afabf0aa8108"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  console.log("Firebase connected successfully");
-</script>
-
 </body>
-  </html>
+</html>
