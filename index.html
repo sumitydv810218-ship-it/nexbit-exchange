@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Nexbit Exchange</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body {
   margin:0;
@@ -58,6 +59,7 @@ footer {
 </head>
 
 <body>
+
 <header>
   <h1>Nexbit</h1>
   <nav>
@@ -82,5 +84,28 @@ footer {
 <footer>
   © 2026 Nexbit Exchange
 </footer>
+
+<!-- 🔽 Firebase config BODY ke end me -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
+    authDomain: "nexbit-exchange.firebaseapp.com",
+    projectId: "nexbit-exchange",
+    storageBucket: "nexbit-exchange.firebasestorage.app",
+    messagingSenderId: "944018123673",
+    appId: "1:944018123673:web:08a769c6e6afabf0aa8108"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  console.log("Firebase connected successfully");
+</script>
+
 </body>
-                                           </html>
+  </html>
