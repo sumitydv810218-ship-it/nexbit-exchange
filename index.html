@@ -1,28 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Nexbit Exchange</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
-        header { background: #0b1c4d; color: #fff; padding: 20px; text-align: center; }
-        h1 { margin: 0; }
-        main { padding: 20px; }
-        .button { background: #004080; color: #fff; padding: 10px 20px; border: none; cursor: pointer; margin: 5px; }
-        .button:hover { background: #00264d; }
-    </style>
+<meta charset="UTF-8">
+<title>Nexbit Exchange</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#0b1220;
+  color:#fff;
+}
+header {
+  background:#0f1a3a;
+  padding:15px 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header h1 { margin:0; color:#4da3ff; }
+nav a {
+  color:#fff;
+  margin-left:20px;
+  text-decoration:none;
+}
+.hero {
+  padding:60px 30px;
+  text-align:center;
+}
+.hero h2 {
+  font-size:36px;
+}
+.hero button {
+  padding:12px 25px;
+  margin:10px;
+  border:none;
+  background:#4da3ff;
+  color:#000;
+  cursor:pointer;
+  font-size:16px;
+}
+.section {
+  padding:40px 30px;
+}
+.card {
+  background:#121c3b;
+  padding:20px;
+  margin:15px 0;
+  border-radius:8px;
+}
+footer {
+  text-align:center;
+  padding:20px;
+  background:#0f1a3a;
+}
+</style>
 </head>
+
 <body>
-    <header>
-        <h1>Welcome to Nexbit Exchange</h1>
-    </header>
-    <main>
-        <h2>Demo Frontend</h2>
-        <p>This is a placeholder homepage for your Nexbit Exchange frontend.</p>
-        <button class="button" onclick="alert('Buy Order Clicked')">Buy</button>
-        <button class="button" onclick="alert('Sell Order Clicked')">Sell</button>
-        <p>Connect your backend later for real trading functionality.</p>
-    </main>
+<header>
+  <h1>Nexbit</h1>
+  <nav>
+    <a href="login.html">Login</a>
+    <a href="signup.html">Sign Up</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h2>Trade the Next Generation</h2>
+  <p>Crypto & INR Exchange Platform</p>
+  <button>Buy Crypto</button>
+  <button>Sell Crypto</button>
+</div>
+
+<div class="section">
+  <div class="card">✔ Secure Trading</div>
+  <div class="card">✔ INR & Crypto Support</div>
+  <div class="card">✔ Fast Transactions</div>
+</div>
+
+<footer>
+  © 2026 Nexbit Exchange
+</footer>
 </body>
-</html>
+                                           </html>
