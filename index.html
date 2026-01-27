@@ -1,89 +1,80 @@
-  <!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Assets Overview</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>Nexbit Assets</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body{margin:0;background:#0b0f1a;color:#fff;font-family:Arial}
-.header{display:flex;justify-content:space-between;align-items:center;padding:15px;background:#0e1424}
-.profile{width:36px;height:36px;border-radius:50%;background:#2d6cff;display:flex;align-items:center;justify-content:center}
-.container{padding:15px}
-.card{background:#121a2f;padding:20px;border-radius:12px}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
-button{padding:12px;border:none;border-radius:8px;font-size:15px}
-.deposit{background:#2d6cff;color:#fff}
-.other{background:#fff;color:#000}
-.search{margin:20px 0}
-.search input{width:100%;padding:12px;border-radius:8px;border:none;background:#0f162b;color:#fff}
-.coin{display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid #1c2545}
+.box{max-width:400px;margin:40px auto;padding:20px;background:#121a2f;border-radius:12px}
+input,button{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:none}
+button{background:#2d6cff;color:#fff}
 .hidden{display:none}
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <h3>Assets</h3>
-  <div class="profile">U</div>
+<div class="box" id="loginBox">
+  <h2>Login</h2>
+  <input id="email" placeholder="Email">
+  <input id="pass" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
 </div>
 
-<div class="container">
-
-<div class="card">
-  <h3>Assets Overview</h3>
-  <p>Balance: <b>$<span id="usd">0.00</span></b></p>
-
-  <div class="actions">
-    <button class="deposit" onclick="deposit()">Deposit</button>
-    <button class="other">Withdraw</button>
-    <button class="other">Transfer</button>
-    <button class="other">Swap</button>
-  </div>
+<div class="box hidden" id="app">
+  <h2>Assets Overview</h2>
+  <p>Balance: $<b id="bal">0.00</b></p>
+  <button onclick="deposit()">Deposit</button>
+  <button>Withdraw</button>
 </div>
 
-<div class="search">
-  <input type="text" id="search" placeholder="Search coin..." onkeyup="filterCoins()">
-</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-<div id="coinList"></div>
+const firebaseConfig = {
+  apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
+  authDomain: "nexbit-exchange.firebaseapp.com",
+  projectId: "nexbit-exchange",
+};
 
-</div>
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-<script>
-let balance = localStorage.getItem("balance")
-  ? parseFloat(localStorage.getItem("balance"))
-  : 0;
+window.login = async ()=>{
+  await signInWithEmailAndPassword(auth,email.value,pass.value);
+};
 
-document.getElementById("usd").innerText = balance.toFixed(2);
+onAuthStateChanged(auth, async user=>{
+  if(!user) return;
+  loginBox.classList.add("hidden");
+  app.classList.remove("hidden");
 
-function deposit(){
-  let amt = prompt("Enter deposit amount (USD)");
-  if(!amt || isNaN(amt) || amt<=0) return;
-  balance += parseFloat(amt);
-  localStorage.setItem("balance", balance);
-  document.getElementById("usd").innerText = balance.toFixed(2);
-}
-
-// COINS
-const coins=["BTC","ETH","USDT","BNB","SOL","USDC","XRP","DOGE"];
-for(let i=1;i<=200;i++) coins.push("COIN"+i);
-
-const list=document.getElementById("coinList");
-coins.forEach((c,i)=>{
-  let d=document.createElement("div");
-  d.className="coin"+(i>7?" hidden":"");
-  d.innerHTML=`<div>${c}</div><div>0.00 USD</div>`;
-  list.appendChild(d);
+  const ref = doc(db,"users",user.uid);
+  const snap = await getDoc(ref);
+  if(!snap.exists()){
+    await setDoc(ref,{ balance:0 });
+    bal.innerText="0.00";
+  } else {
+    bal.innerText = snap.data().balance.toFixed(2);
+  }
 });
 
-function filterCoins(){
-  let q=document.getElementById("search").value.toUpperCase();
-  document.querySelectorAll(".coin").forEach(c=>{
-    c.style.display=c.innerText.includes(q)?"flex":"none";
-  });
-}
+window.deposit = async ()=>{
+  let amt = prompt("Enter deposit amount");
+  if(!amt || isNaN(amt)) return;
+
+  const user = auth.currentUser;
+  const ref = doc(db,"users",user.uid);
+  const snap = await getDoc(ref);
+  let newBal = snap.data().balance + parseFloat(amt);
+
+  await updateDoc(ref,{ balance:newBal });
+  bal.innerText = newBal.toFixed(2);
+};
 </script>
 
 </body>
