@@ -2,13 +2,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Nexbit Assets</title>
+<title>Nexbit Wallet</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body{margin:0;background:#0b0f1a;color:#fff;font-family:Arial}
-.box{max-width:400px;margin:40px auto;padding:20px;background:#121a2f;border-radius:12px}
-input,button{width:100%;padding:12px;margin:8px 0;border-radius:8px;border:none}
+.box{max-width:420px;margin:30px auto;padding:20px;background:#121a2f;border-radius:12px}
+button,input,select{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:none}
 button{background:#2d6cff;color:#fff}
+.coin{display:flex;justify-content:space-between;padding:10px;background:#1a2445;margin:6px 0;border-radius:8px}
 .hidden{display:none}
 </style>
 </head>
@@ -16,37 +17,50 @@ button{background:#2d6cff;color:#fff}
 <body>
 
 <div class="box" id="loginBox">
-  <h2>Login</h2>
+  <h3>Login</h3>
   <input id="email" placeholder="Email">
   <input id="pass" type="password" placeholder="Password">
   <button onclick="login()">Login</button>
 </div>
 
 <div class="box hidden" id="app">
-  <h2>Assets Overview</h2>
-  <p>Balance: $<b id="bal">0.00</b></p>
-  <button onclick="deposit()">Deposit</button>
-  <button>Withdraw</button>
+  <h3>Assets</h3>
+
+  <div class="coin"><span>BTC</span><b id="BTC">0</b></div>
+  <div class="coin"><span>ETH</span><b id="ETH">0</b></div>
+  <div class="coin"><span>USDT</span><b id="USDT">0</b></div>
+
+  <hr>
+
+  <h4>Withdraw</h4>
+  <select id="coin">
+    <option>BTC</option>
+    <option>ETH</option>
+    <option>USDT</option>
+  </select>
+  <input id="amount" placeholder="Amount">
+  <input id="address" placeholder="Wallet Address">
+  <button onclick="withdraw()">Submit Request</button>
+
+  <p id="msg"></p>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
   authDomain: "nexbit-exchange.firebaseapp.com",
-  projectId: "nexbit-exchange",
+  projectId: "nexbit-exchange"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-window.login = async ()=>{
-  await signInWithEmailAndPassword(auth,email.value,pass.value);
-};
+window.login = ()=>signInWithEmailAndPassword(auth,email.value,pass.value);
 
 onAuthStateChanged(auth, async user=>{
   if(!user) return;
@@ -55,25 +69,50 @@ onAuthStateChanged(auth, async user=>{
 
   const ref = doc(db,"users",user.uid);
   const snap = await getDoc(ref);
+
   if(!snap.exists()){
-    await setDoc(ref,{ balance:0 });
-    bal.innerText="0.00";
-  } else {
-    bal.innerText = snap.data().balance.toFixed(2);
+    await setDoc(ref,{
+      balances:{ BTC:0, ETH:0, USDT:0 },
+      email:user.email
+    });
   }
+  loadBalances();
 });
 
-window.deposit = async ()=>{
-  let amt = prompt("Enter deposit amount");
-  if(!amt || isNaN(amt)) return;
+async function loadBalances(){
+  const user = auth.currentUser;
+  const snap = await getDoc(doc(db,"users",user.uid));
+  const b = snap.data().balances;
+  BTC.innerText=b.BTC;
+  ETH.innerText=b.ETH;
+  USDT.innerText=b.USDT;
+}
+
+window.withdraw = async ()=>{
+  const c = coin.value;
+  const amt = Number(amount.value);
+  if(amt<=0) return;
 
   const user = auth.currentUser;
   const ref = doc(db,"users",user.uid);
   const snap = await getDoc(ref);
-  let newBal = snap.data().balance + parseFloat(amt);
+  const bal = snap.data().balances;
 
-  await updateDoc(ref,{ balance:newBal });
-  bal.innerText = newBal.toFixed(2);
+  if(bal[c] < amt){
+    msg.innerText="Insufficient balance";
+    return;
+  }
+
+  await addDoc(collection(db,"withdrawals"),{
+    uid:user.uid,
+    coin:c,
+    amount:amt,
+    address:address.value,
+    status:"pending",
+    time:serverTimestamp()
+  });
+
+  msg.innerText="Withdrawal request submitted";
 };
 </script>
 
