@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Nexbit Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#0b1220;
+  color:#fff;
+}
+header{
+  background:#0f1a3a;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header h1{margin:0;color:#4da3ff}
+button{
+  padding:8px 14px;
+  background:#4da3ff;
+  border:none;
+  cursor:pointer;
+}
+.container{padding:20px}
+.card{
+  background:#121c3b;
+  padding:15px;
+  margin-bottom:15px;
+  border-radius:8px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  padding:10px;
+  border-bottom:1px solid #1e2a55;
+  text-align:left;
+}
+.status-pending{color:orange}
+.status-approved{color:#00ff9c}
+.status-rejected{color:#ff4d4d}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Nexbit Admin</h1>
+  <button onclick="logout()">Logout</button>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2>📥 Deposit Requests</h2>
+    <table id="depositTable">
+      <tr>
+        <th>User</th>
+        <th>Coin</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>📤 Withdrawal Requests</h2>
+    <table id="withdrawTable">
+      <tr>
+        <th>User</th>
+        <th>Coin</th>
+        <th>Amount</th>
+        <th>Address</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
+  authDomain: "nexbit-exchange.firebaseapp.com",
+  projectId: "nexbit-exchange",
+  storageBucket: "nexbit-exchange.firebasestorage.app",
+  messagingSenderId: "944018123673",
+  appId: "1:944018123673:web:08a769c6e6afabf0aa8108"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// 🔐 CHANGE THIS TO YOUR ADMIN EMAIL
+const ADMIN_EMAIL = "admin@nexbit.com";
+
+// AUTH CHECK
+onAuthStateChanged(auth, user=>{
+  if(!user || user.email !== ADMIN_EMAIL){
+    alert("Access Denied");
+    window.location.href = "login.html";
+  } else {
+    loadDeposits();
+    loadWithdrawals();
+  }
+});
+
+// LOAD DEPOSITS
+function loadDeposits(){
+  onSnapshot(collection(db,"deposits"), snap=>{
+    const table = document.getElementById("depositTable");
+    table.innerHTML = `
+      <tr>
+        <th>User</th><th>Coin</th><th>Amount</th><th>Status</th><th>Action</th>
+      </tr>`;
+    snap.forEach(docu=>{
+      const d = docu.data();
+      table.innerHTML += `
+      <tr>
+        <td>${d.email}</td>
+        <td>${d.coin}</td>
+        <td>${d.amount}</td>
+        <td class="status-${d.status}">${d.status}</td>
+        <td>
+          <button onclick="updateStatus('deposits','${docu.id}','approved')">Approve</button>
+          <button onclick="updateStatus('deposits','${docu.id}','rejected')">Reject</button>
+        </td>
+      </tr>`;
+    });
+  });
+}
+
+// LOAD WITHDRAWALS
+function loadWithdrawals(){
+  onSnapshot(collection(db,"withdrawals"), snap=>{
+    const table = document.getElementById("withdrawTable");
+    table.innerHTML = `
+      <tr>
+        <th>User</th><th>Coin</th><th>Amount</th><th>Address</th><th>Status</th><th>Action</th>
+      </tr>`;
+    snap.forEach(docu=>{
+      const w = docu.data();
+      table.innerHTML += `
+      <tr>
+        <td>${w.email}</td>
+        <td>${w.coin}</td>
+        <td>${w.amount}</td>
+        <td>${w.address}</td>
+        <td class="status-${w.status}">${w.status}</td>
+        <td>
+          <button onclick="updateStatus('withdrawals','${docu.id}','approved')">Approve</button>
+          <button onclick="updateStatus('withdrawals','${docu.id}','rejected')">Reject</button>
+        </td>
+      </tr>`;
+    });
+  });
+}
+
+// UPDATE STATUS
+window.updateStatus = async (col,id,status)=>{
+  await updateDoc(doc(db,col,id),{status});
+};
+
+// LOGOUT
+window.logout = ()=>{
+  signOut(auth).then(()=>location.href="login.html");
+};
+</script>
+
+</body>
+</html>
