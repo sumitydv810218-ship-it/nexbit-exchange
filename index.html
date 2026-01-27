@@ -2,15 +2,16 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Nexbit Wallet</title>
+<title>Nexbit Exchange</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body{margin:0;background:#0b0f1a;color:#fff;font-family:Arial}
-.box{max-width:420px;margin:30px auto;padding:20px;background:#121a2f;border-radius:12px}
-button,input,select{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:none}
+.box{max-width:420px;margin:20px auto;padding:20px;background:#121a2f;border-radius:12px}
+input,button,select{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:none}
 button{background:#2d6cff;color:#fff}
-.coin{display:flex;justify-content:space-between;padding:10px;background:#1a2445;margin:6px 0;border-radius:8px}
+.coin{display:flex;justify-content:space-between;padding:10px;background:#1a2445;margin:5px 0;border-radius:8px}
 .hidden{display:none}
+.search{background:#0b0f1a;color:#fff;border:1px solid #333}
 </style>
 </head>
 
@@ -26,21 +27,24 @@ button{background:#2d6cff;color:#fff}
 <div class="box hidden" id="app">
   <h3>Assets</h3>
 
-  <div class="coin"><span>BTC</span><b id="BTC">0</b></div>
-  <div class="coin"><span>ETH</span><b id="ETH">0</b></div>
-  <div class="coin"><span>USDT</span><b id="USDT">0</b></div>
+  <input class="search" placeholder="Search coin..." oninput="filterCoins(this.value)">
+
+  <div id="coins"></div>
+
+  <hr>
+
+  <h4>Deposit</h4>
+  <select id="dcoin"></select>
+  <input id="damount" placeholder="Amount">
+  <button onclick="deposit()">Submit Deposit</button>
 
   <hr>
 
   <h4>Withdraw</h4>
-  <select id="coin">
-    <option>BTC</option>
-    <option>ETH</option>
-    <option>USDT</option>
-  </select>
-  <input id="amount" placeholder="Amount">
-  <input id="address" placeholder="Wallet Address">
-  <button onclick="withdraw()">Submit Request</button>
+  <select id="wcoin"></select>
+  <input id="wamount" placeholder="Amount">
+  <input id="waddress" placeholder="Wallet Address">
+  <button onclick="withdraw()">Submit Withdraw</button>
 
   <p id="msg"></p>
 </div>
@@ -48,7 +52,7 @@ button{background:#2d6cff;color:#fff}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
@@ -60,6 +64,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+const COINS = ["BTC","ETH","USDT","BNB","SOL","XRP","DOGE","TRX","AVAX","SHIB","DOT","MATIC","LTC","UNI","ICP","NEAR","FIL","ARB","OP","APT"]; // extend to 200+
+
 window.login = ()=>signInWithEmailAndPassword(auth,email.value,pass.value);
 
 onAuthStateChanged(auth, async user=>{
@@ -69,52 +75,54 @@ onAuthStateChanged(auth, async user=>{
 
   const ref = doc(db,"users",user.uid);
   const snap = await getDoc(ref);
-
   if(!snap.exists()){
-    await setDoc(ref,{
-      balances:{ BTC:0, ETH:0, USDT:0 },
-      email:user.email
-    });
+    const bal={}; COINS.forEach(c=>bal[c]=0);
+    await setDoc(ref,{ email:user.email, balances:bal });
   }
-  loadBalances();
+  renderCoins();
 });
 
-async function loadBalances(){
-  const user = auth.currentUser;
-  const snap = await getDoc(doc(db,"users",user.uid));
+async function renderCoins(){
+  const snap = await getDoc(doc(db,"users",auth.currentUser.uid));
   const b = snap.data().balances;
-  BTC.innerText=b.BTC;
-  ETH.innerText=b.ETH;
-  USDT.innerText=b.USDT;
+  coins.innerHTML="";
+  dcoin.innerHTML="";
+  wcoin.innerHTML="";
+  COINS.forEach(c=>{
+    coins.innerHTML+=`<div class="coin"><span>${c}</span><b>${b[c]||0}</b></div>`;
+    dcoin.innerHTML+=`<option>${c}</option>`;
+    wcoin.innerHTML+=`<option>${c}</option>`;
+  });
 }
 
-window.withdraw = async ()=>{
-  const c = coin.value;
-  const amt = Number(amount.value);
-  if(amt<=0) return;
+window.filterCoins = q=>{
+  [...coins.children].forEach(d=>{
+    d.style.display = d.innerText.toLowerCase().includes(q.toLowerCase()) ? "flex":"none";
+  });
+}
 
-  const user = auth.currentUser;
-  const ref = doc(db,"users",user.uid);
-  const snap = await getDoc(ref);
-  const bal = snap.data().balances;
-
-  if(bal[c] < amt){
-    msg.innerText="Insufficient balance";
-    return;
-  }
-
-  await addDoc(collection(db,"withdrawals"),{
-    uid:user.uid,
-    coin:c,
-    amount:amt,
-    address:address.value,
+window.deposit = async ()=>{
+  await addDoc(collection(db,"deposits"),{
+    uid:auth.currentUser.uid,
+    coin:dcoin.value,
+    amount:Number(damount.value),
     status:"pending",
     time:serverTimestamp()
   });
+  msg.innerText="Deposit pending approval";
+}
 
-  msg.innerText="Withdrawal request submitted";
-};
+window.withdraw = async ()=>{
+  await addDoc(collection(db,"withdrawals"),{
+    uid:auth.currentUser.uid,
+    coin:wcoin.value,
+    amount:Number(wamount.value),
+    address:waddress.value,
+    status:"pending",
+    time:serverTimestamp()
+  });
+  msg.innerText="Withdraw request submitted";
+}
 </script>
-
 </body>
 </html>
