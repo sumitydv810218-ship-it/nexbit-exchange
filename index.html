@@ -1,113 +1,90 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Nexbit Exchange</title>
+<title>Assets Overview</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#0b1220;
-  color:#fff;
-}
-header {
-  background:#0f1a3a;
-  padding:15px 30px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-header h1 { margin:0; color:#4da3ff; }
-nav a {
-  color:#fff;
-  margin-left:20px;
-  text-decoration:none;
-}
-.hero {
-  padding:60px 30px;
-  text-align:center;
-}
-.hero h2 {
-  font-size:36px;
-}
-.hero button {
-  padding:12px 25px;
-  margin:10px;
-  border:none;
-  background:#4da3ff;
-  color:#000;
-  cursor:pointer;
-  font-size:16px;
-}
-.section {
-  padding:40px 30px;
-}
-.card {
-  background:#121c3b;
-  padding:20px;
-  margin:15px 0;
-  border-radius:8px;
-}
-footer {
-  text-align:center;
-  padding:20px;
-  background:#0f1a3a;
-}
+body{margin:0;background:#0b0f1a;color:#fff;font-family:Arial}
+.header{display:flex;justify-content:space-between;align-items:center;padding:15px;background:#0e1424}
+.profile{width:36px;height:36px;border-radius:50%;background:#2d6cff;display:flex;align-items:center;justify-content:center}
+.container{padding:15px}
+.card{background:#121a2f;padding:20px;border-radius:12px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
+button{padding:12px;border:none;border-radius:8px;font-size:15px}
+.deposit{background:#2d6cff;color:#fff}
+.other{background:#fff;color:#000}
+.search{margin:20px 0}
+.search input{width:100%;padding:12px;border-radius:8px;border:none;background:#0f162b;color:#fff}
+.coin{display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid #1c2545}
+.hidden{display:none}
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>Nexbit</h1>
-  <nav>
-    <a href="login.html">Login</a>
-    <a href="signup.html">Sign Up</a>
-  </nav>
-</header>
-
-<div class="hero">
-  <h2>Trade the Next Generation</h2>
-  <p>Crypto & INR Exchange Platform</p>
-  <button>Buy Crypto</button>
-  <button>Sell Crypto</button>
+<div class="header">
+  <h3>Assets</h3>
+  <div class="profile">U</div>
 </div>
 
-<!-- 🔥 TRADINGVIEW CHART START -->
-<div style="height:500px; margin:30px;">
-  <div id="tradingview_chart" style="height:100%;"></div>
+<div class="container">
+
+<div class="card">
+  <h3>Assets Overview</h3>
+  <p>Balance: <b>$<span id="usd">0.00</span></b></p>
+
+  <div class="actions">
+    <button class="deposit" onclick="deposit()">Deposit</button>
+    <button class="other">Withdraw</button>
+    <button class="other">Transfer</button>
+    <button class="other">Swap</button>
+  </div>
 </div>
 
-<script src="https://s3.tradingview.com/tv.js"></script>
+<div class="search">
+  <input type="text" id="search" placeholder="Search coin..." onkeyup="filterCoins()">
+</div>
+
+<div id="coinList"></div>
+
+</div>
+
 <script>
-  new TradingView.widget({
-    "autosize": true,
-    "symbol": "BINANCE:BTCUSDT",
-    "interval": "15",
-    "timezone": "Asia/Kolkata",
-    "theme": "dark",
-    "style": "1",
-    "locale": "en",
-    "toolbar_bg": "#0b1220",
-    "enable_publishing": false,
-    "hide_side_toolbar": false,
-    "allow_symbol_change": true,
-    "container_id": "tradingview_chart"
+let balance = localStorage.getItem("balance")
+  ? parseFloat(localStorage.getItem("balance"))
+  : 0;
+
+document.getElementById("usd").innerText = balance.toFixed(2);
+
+function deposit(){
+  let amt = prompt("Enter deposit amount (USD)");
+  if(!amt || isNaN(amt) || amt<=0) return;
+  balance += parseFloat(amt);
+  localStorage.setItem("balance", balance);
+  document.getElementById("usd").innerText = balance.toFixed(2);
+}
+
+// COINS
+const coins=["BTC","ETH","USDT","BNB","SOL","USDC","XRP","DOGE"];
+for(let i=1;i<=200;i++) coins.push("COIN"+i);
+
+const list=document.getElementById("coinList");
+coins.forEach((c,i)=>{
+  let d=document.createElement("div");
+  d.className="coin"+(i>7?" hidden":"");
+  d.innerHTML=`<div>${c}</div><div>0.00 USD</div>`;
+  list.appendChild(d);
+});
+
+function filterCoins(){
+  let q=document.getElementById("search").value.toUpperCase();
+  document.querySelectorAll(".coin").forEach(c=>{
+    c.style.display=c.innerText.includes(q)?"flex":"none";
   });
+}
 </script>
-<!-- 🔥 TRADINGVIEW CHART END -->
-
-<div class="section">
-  <div class="card">✔ Secure Trading</div>
-  <div class="card">✔ INR & Crypto Support</div>
-  <div class="card">✔ Fast Transactions</div>
-</div>
-
-<footer>
-  © 2026 Nexbit Exchange
-</footer>
 
 </body>
 </html>
