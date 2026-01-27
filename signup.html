@@ -2,21 +2,90 @@
 <html>
 <head>
 <title>Nexbit Signup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body{background:#0b1220;color:#fff;font-family:Arial}
-form{max-width:320px;margin:80px auto}
-input,button{width:100%;padding:10px;margin:10px 0}
-button{background:#4da3ff;border:none}
+body{
+  background:#0b1220;
+  color:#fff;
+  font-family:Arial;
+}
+form{
+  max-width:320px;
+  margin:80px auto;
+}
+input,button{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+}
+button{
+  background:#4da3ff;
+  border:none;
+  cursor:pointer;
+}
 </style>
 </head>
+
 <body>
-<form name="signup" method="POST" data-netlify="true">
-<h2>Create Account</h2>
-<input type="hidden" name="form-name" value="signup">
-<input name="email" type="email" placeholder="Email" required>
-<input name="phone" type="text" placeholder="Phone / UPI">
-<input name="password" type="password" placeholder="Password" required>
-<button>Register</button>
+
+<form id="signupForm">
+  <h2>Create Account</h2>
+
+  <input id="email" type="email" placeholder="Email" required>
+  <input id="phone" type="text" placeholder="Phone / UPI">
+  <input id="password" type="password" placeholder="Password" required>
+
+  <button type="submit">Register</button>
 </form>
+
+<!-- 🔽 Firebase Signup Logic (BODY ke end me) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
+    authDomain: "nexbit-exchange.firebaseapp.com",
+    projectId: "nexbit-exchange",
+    storageBucket: "nexbit-exchange.firebasestorage.app",
+    messagingSenderId: "944018123673",
+    appId: "1:944018123673:web:08a769c6e6afabf0aa8108"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const form = document.getElementById("signupForm");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const phone = document.getElementById("phone").value;
+
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(async (userCredential) => {
+        const user = userCredential.user;
+
+        // 🔥 extra data Firestore me save
+        await setDoc(doc(db, "users", user.uid), {
+          email: email,
+          phone: phone,
+          createdAt: new Date()
+        });
+
+        alert("Account created successfully");
+        window.location.href = "login.html";
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  });
+</script>
+
 </body>
 </html>
