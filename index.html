@@ -24,32 +24,31 @@ button,select{background:none;border:none;color:#fff;cursor:pointer}
 .container{padding:15px}
 .card{background:#121c3b;border-radius:12px;padding:15px;margin-bottom:15px}
 
-.asset-row{
-background:#0f1a3a;
-border-radius:10px;
-margin-bottom:10px;
-padding:12px
-}
-.asset-head{
-display:flex;
-justify-content:space-between;
-align-items:center;
-cursor:pointer
-}
+.asset-row{background:#0f1a3a;border-radius:10px;margin-bottom:10px;padding:12px}
+.asset-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 .asset-left{display:flex;gap:10px;align-items:center}
 .asset-left img{width:28px;height:28px}
 .asset-actions{display:none;gap:8px;margin-top:10px}
-.asset-actions button{
-flex:1;background:#1b2a5a;border:none;padding:8px;border-radius:8px
-}
+.asset-actions button{flex:1;background:#1b2a5a;border:none;padding:8px;border-radius:8px}
 
 .search{width:100%;padding:10px;border-radius:8px;border:none;margin-bottom:10px}
 .hidden{display:none}
 
-/* profile */
-.avatar{width:32px;height:32px;border-radius:50%}
+/* PROFILE */
+.profile{position:relative}
+.avatar{width:34px;height:34px;border-radius:50%;cursor:pointer}
+.profile-menu{
+position:absolute;right:0;top:45px;
+background:#121c3b;border-radius:10px;
+width:220px;display:none;z-index:10
+}
+.profile-menu div{
+padding:10px 14px;border-bottom:1px solid #1b2a5a;
+cursor:pointer
+}
+.profile-menu div:last-child{border:none;color:#ff5c5c}
 
-/* modal */
+/* MODAL */
 .modal{
 position:fixed;top:0;left:0;width:100%;height:100%;
 background:rgba(0,0,0,.6);
@@ -73,19 +72,31 @@ background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px
 
   <div class="right">
     <select onchange="changeLang(this.value)">
-      <option value="en">EN</option><option value="hi">HI</option>
-      <option value="tr">TR</option><option value="de">DE</option>
-      <option value="es">ES</option><option value="fr">FR</option>
-      <option value="pt">PT</option><option value="ru">RU</option>
-      <option value="ar">AR</option><option value="zh">ZH</option>
-      <option value="ja">JA</option><option value="ko">KO</option>
-      <option value="it">IT</option><option value="nl">NL</option>
-      <option value="pl">PL</option><option value="sv">SV</option>
-      <option value="id">ID</option><option value="th">TH</option>
-      <option value="vi">VI</option>
+      <option value="en">English</option>
+      <option value="hi">Hindi</option>
+      <option value="zh">Chinese</option>
+      <option value="tr">Turkish</option>
+      <option value="de">German</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="ru">Russian</option>
+      <option value="ar">Arabic</option>
     </select>
-    <img src="https://i.pravatar.cc/40" class="avatar">
-    <button onclick="logout()">Logout</button>
+
+    <div class="profile">
+      <img src="https://i.pravatar.cc/40" class="avatar" onclick="toggleProfile()">
+      <div class="profile-menu" id="profileMenu">
+        <div>Wallet</div>
+        <div>Settings</div>
+        <div>Security</div>
+        <div>Identity Verification</div>
+        <div>Wallet Connect</div>
+        <div>Referral Program</div>
+        <div>API Management</div>
+        <div>Mobile App</div>
+        <div onclick="logout()">Sign Out</div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -101,9 +112,7 @@ background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px
 
 <input class="search" placeholder="Search coin..." onkeyup="searchCoin(this.value)">
 
-<div id="assetsTab">
-  <div id="assetList"></div>
-</div>
+<div id="assetsTab"><div id="assetList"></div></div>
 
 <div id="historyTab" class="hidden">
   <div class="card">
@@ -115,36 +124,18 @@ background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px
 
 </div>
 
-<!-- MODALS -->
-<div class="modal" id="depositModal">
-  <div class="modal-content">
-    <h3>Deposit</h3>
-    <input placeholder="Coin">
-    <input placeholder="Amount">
-    <input placeholder="TXN ID">
-    <button onclick="closeModal()">Submit</button>
-  </div>
-</div>
-
-<div class="modal" id="withdrawModal">
-  <div class="modal-content">
-    <h3>Withdraw</h3>
-    <input placeholder="Coin">
-    <input placeholder="Amount">
-    <input placeholder="Wallet Address">
-    <button onclick="closeModal()">Submit</button>
-  </div>
-</div>
-
 <script>
-/* ---------- LANGUAGE ---------- */
+/* PROFILE */
+function toggleProfile(){
+profileMenu.style.display =
+profileMenu.style.display==="block"?"none":"block";
+}
+
+/* LANGUAGE */
 const L={
 en:{bal:"Total Balance",his:"Transaction History"},
 hi:{bal:"कुल बैलेंस",his:"लेन-देन इतिहास"},
-tr:{bal:"Toplam Bakiye",his:"İşlem Geçmişi"},
-de:{bal:"Gesamtguthaben",his:"Verlauf"},
-es:{bal:"Balance Total",his:"Historial"},
-fr:{bal:"Solde Total",his:"Historique"}
+zh:{bal:"总余额",his:"交易历史"}
 };
 function changeLang(l){
 const t=L[l]||L.en;
@@ -152,45 +143,31 @@ lbl_balance.innerText=t.bal;
 lbl_history.innerText=t.his;
 }
 
-/* ---------- TABS ---------- */
+/* TABS */
 function showTab(t){
 assetsTab.classList.toggle("hidden",t!=="assets");
 historyTab.classList.toggle("hidden",t!=="history");
-t_assets.classList.toggle("active",t==="assets");
-t_history.classList.toggle("active",t==="history");
 }
 
-/* ---------- COINS (200+) ---------- */
-const symbols = [
-"BTC","ETH","USDT","BNB","SOL","XRP","ADA","DOGE","DOT","TRX",
-"LTC","AVAX","SHIB","LINK","ATOM","XMR","ETC","BCH","ICP","NEAR"
-];
-while(symbols.length<220){
-symbols.push(symbols.length+"COIN");
-}
+/* COINS */
+const symbols=["BTC","ETH","USDT","BNB","SOL","XRP","ADA","DOGE","DOT","TRX"];
+while(symbols.length<220){symbols.push("COIN"+symbols.length)}
+
 const coins=symbols.map(s=>({
 name:s,
-logo:`https://cryptologos.cc/logos/${s.toLowerCase()}-${s.toLowerCase()}-logo.png`
+logo:`https://assets.coingecko.com/coins/images/1/large/bitcoin.png`
 }));
 
-let page=0, perPage=12, filtered=[...coins];
-
+let filtered=[...coins];
 function render(){
-assetList.innerHTML=filtered.slice(page*perPage,(page+1)*perPage).map(c=>`
+assetList.innerHTML=filtered.slice(0,12).map(c=>`
 <div class="asset-row">
-<div class="asset-head" onclick="this.nextElementSibling.style.display=
-this.nextElementSibling.style.display==='flex'?'none':'flex'">
+<div class="asset-head">
 <div class="asset-left">
-<img src="${c.logo}" onerror="this.src='https://cryptologos.cc/logos/generic-crypto-logo.png'">
+<img src="${c.logo}">
 <strong>${c.name}</strong>
 </div>
-<span>0.00 ▾</span>
-</div>
-<div class="asset-actions">
-<button onclick="openModal('deposit')">Deposit</button>
-<button onclick="openModal('withdraw')">Withdraw</button>
-<button>Transfer</button>
-<button>Swap</button>
+<span>0.00</span>
 </div>
 </div>`).join("");
 }
@@ -198,18 +175,18 @@ render();
 
 function searchCoin(v){
 filtered=coins.filter(c=>c.name.includes(v.toUpperCase()));
-page=0;render();
+render();
 }
 
-/* ---------- MODAL ---------- */
+/* MODAL */
 function openModal(t){document.getElementById(t+"Modal").style.display="flex"}
 function closeModal(){depositModal.style.display="none";withdrawModal.style.display="none"}
 </script>
 
-<!-- FIREBASE AUTH -->
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { getAuth,onAuthStateChanged,signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
 const app=initializeApp({
 apiKey:"AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
@@ -222,4 +199,4 @@ window.logout=()=>signOut(auth).then(()=>location.href="login.html");
 </script>
 
 </body>
-        </html>
+</html>
