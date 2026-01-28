@@ -32,24 +32,13 @@ button,select{background:none;border:none;color:#fff;cursor:pointer}
 .card{background:#121c3b;border-radius:12px;padding:15px;margin-bottom:15px}
 .hidden{display:none}
 
-/* ASSETS */
-.search{width:100%;padding:10px;border-radius:8px;border:none;margin-bottom:10px}
-.asset-row{background:#0f1a3a;border-radius:10px;margin-bottom:10px;padding:12px}
-.asset-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-.asset-left{display:flex;gap:10px;align-items:center}
-.asset-left img{width:28px;height:28px}
-.asset-actions{display:none;gap:8px;margin-top:10px}
-.asset-actions button{flex:1;background:#1b2a5a;padding:8px;border-radius:8px}
+/* IFRAME (coins page) */
+iframe{width:100%;height:75vh;border:none;border-radius:12px;background:#0b1220}
 
-/* HISTORY – FIXED DESIGN */
+/* HISTORY */
 .history-list{background:#121c3b;border-radius:12px;padding:10px}
-.history-item{
-padding:12px;
-border-bottom:1px solid #1b2a5a;
-cursor:pointer;
-}
+.history-item{padding:12px;border-bottom:1px solid #1b2a5a;cursor:pointer}
 .history-item:last-child{border-bottom:none}
-.history-item:hover{background:#0f1a3a}
 .history-title{font-weight:bold;color:#4da3ff}
 
 /* MODAL */
@@ -81,8 +70,12 @@ cursor:pointer;
 
 <div class="right">
 <select>
-<option>English</option><option>Hindi</option><option>Chinese</option>
-<option>French</option><option>German</option><option>Russian</option>
+<option>English</option>
+<option>Hindi</option>
+<option>Chinese</option>
+<option>French</option>
+<option>German</option>
+<option>Russian</option>
 </select>
 <img src="https://i.pravatar.cc/40" class="avatar" onclick="toggleProfile()">
 </div>
@@ -112,18 +105,15 @@ cursor:pointer;
 <button onclick="openModal('withdraw')">Withdraw</button>
 </div>
 
-<!-- ASSETS -->
+<!-- ASSETS PAGE (coins.html load) -->
 <div id="assetsPage">
-<input class="search" placeholder="Search coin..." onkeyup="searchCoin(this.value)">
-<div id="assetList"></div>
+<iframe src="coins.html"></iframe>
 </div>
 
-<!-- HISTORY -->
+<!-- HISTORY PAGE -->
 <div id="historyPage" class="hidden">
 <div class="history-list">
-<div class="history-item">
-<div class="history-title">All Transactions</div>
-</div>
+<div class="history-item"><div class="history-title">All Transactions</div></div>
 <div class="history-item">Deposit</div>
 <div class="history-item">Withdrawal</div>
 <div class="history-item">Transfer</div>
@@ -158,7 +148,7 @@ cursor:pointer;
 function toggleDrawer(){drawer.classList.toggle("open");closeProfile()}
 function closeDrawer(){drawer.classList.remove("open")}
 function toggleProfile(){
-profileMenu.style.display=profileMenu.style.display==="block"?"none":"block"
+profileMenu.style.display=profileMenu.style.display==="block"?"none":"block";
 closeDrawer()
 }
 function closeProfile(){profileMenu.style.display="none"}
@@ -176,51 +166,11 @@ t_history.classList.add("active")
 t_assets.classList.remove("active")
 }
 
-/* COINS + LOGO FIX */
-const symbols=[
-"BTC","ETH","USDT","BNB","SOL","XRP","ADA","DOGE","TRX","DOT","MATIC","AVAX",
-"SHIB","LTC","LINK","ATOM","XMR","ETC","BCH","ICP","NEAR","FIL","HBAR","APT"
-];
-while(symbols.length<210)symbols.push("TOKEN"+symbols.length);
-
-const coins=symbols.map(s=>({
-name:s,
-logo:`https://assets.coingecko.com/coins/images/1/large/bitcoin.png`
-}));
-
-let filtered=[...coins];
-
-function render(){
-assetList.innerHTML=filtered.slice(0,10).map(c=>`
-<div class="asset-row">
-<div class="asset-head" onclick="this.nextElementSibling.style.display=
-this.nextElementSibling.style.display==='flex'?'none':'flex'">
-<div class="asset-left">
-<img src="${c.logo}">
-<strong>${c.name}</strong>
-</div>
-<span>0.00 ▾</span>
-</div>
-<div class="asset-actions">
-<button onclick="openModal('deposit')">Deposit</button>
-<button onclick="openModal('withdraw')">Withdraw</button>
-<button>Transfer</button>
-<button>Swap</button>
-</div>
-</div>
-`).join("");
-}
-render();
-
-function searchCoin(v){
-filtered=coins.filter(c=>c.name.includes(v.toUpperCase()));
-render();
-}
-
 function openModal(t){document.getElementById(t+"Modal").style.display="flex"}
 function closeModal(){depositModal.style.display="none";withdrawModal.style.display="none"}
 </script>
 
+<!-- FIREBASE AUTH -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut}
@@ -237,4 +187,4 @@ window.logout=()=>signOut(auth).then(()=>location.href="login.html");
 </script>
 
 </body>
-</html>
+  </html>
