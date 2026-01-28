@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexbit – Coins</title>
+<style>
+body{margin:0;background:#0b1220;color:#fff;font-family:Arial}
+header{padding:12px;background:#0f1a33;display:flex;align-items:center;gap:10px}
+header button{background:none;border:none;color:#fff;font-size:20px}
+.search{width:100%;padding:12px;border-radius:10px;border:none;margin:12px}
+.coin{background:#0f1a33;border-radius:12px;padding:12px;margin:10px;
+display:flex;justify-content:space-between;align-items:center}
+.left{display:flex;align-items:center;gap:10px}
+.coin img{width:32px;height:32px}
+.up{color:#2ecc71}
+.down{color:#e74c3c}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);
+display:none;align-items:flex-end}
+.sheet{background:#0f1a33;width:100%;border-radius:16px 16px 0 0;padding:16px}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.actions button{padding:12px;border:none;border-radius:10px;background:#18264d;color:#fff}
+</style>
+</head>
+<body>
+
+<header>
+  <button onclick="history.back()">←</button>
+  <h3>All Coins</h3>
+</header>
+
+<input class="search" placeholder="Search coin..." oninput="searchCoin(this.value)">
+<div id="coinList"></div>
+
+<div class="modal" id="modal">
+  <div class="sheet">
+    <h3 id="coinName"></h3>
+    <div class="actions">
+      <button>Deposit</button>
+      <button>Withdraw</button>
+      <button>Transfer</button>
+      <button>Swap</button>
+    </div>
+    <p style="text-align:center;margin-top:10px" onclick="closeModal()">Close</p>
+  </div>
+</div>
+
+<script>
+let allCoins=[];
+
+fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=300&page=1&price_change_percentage=24h")
+.then(r=>r.json())
+.then(d=>{
+  allCoins=d;
+  renderCoins(d.slice(0,10)); // default 10
+});
+
+function renderCoins(list){
+  const box=document.getElementById("coinList");
+  box.innerHTML="";
+  list.forEach(c=>{
+    const ch=c.price_change_percentage_24h;
+    box.innerHTML+=`
+      <div class="coin" onclick="openModal('${c.name} (${c.symbol.toUpperCase()})')">
+        <div class="left">
+          <img src="${c.image}">
+          <div>
+            <div>${c.name}</div>
+            <small>${c.symbol.toUpperCase()}</small>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <b>$${c.current_price}</b><br>
+          <span class="${ch>=0?'up':'down'}">${ch?.toFixed(2)}%</span>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function searchCoin(v){
+  if(!v){renderCoins(allCoins.slice(0,10));return;}
+  renderCoins(allCoins.filter(c=>
+    c.name.toLowerCase().includes(v.toLowerCase()) ||
+    c.symbol.toLowerCase().includes(v.toLowerCase())
+  ));
+}
+
+function openModal(name){
+  document.getElementById("coinName").innerText=name;
+  document.getElementById("modal").style.display="flex";
+}
+function closeModal(){
+  document.getElementById("modal").style.display="none";
+}
+</script>
+
+</body>
+</html>
