@@ -16,16 +16,13 @@ display:flex;
 justify-content:space-between;
 align-items:center
 }
-header .left{display:flex;gap:15px;align-items:center}
-header .right{display:flex;gap:10px;align-items:center}
+header .left, header .right{display:flex;gap:15px;align-items:center}
 .tab{cursor:pointer}
 .tab.active{color:#4da3ff}
-button{background:none;border:none;color:#fff;cursor:pointer}
+button,select{background:none;border:none;color:#fff;cursor:pointer}
 
 .container{padding:15px}
 .card{background:#121c3b;border-radius:12px;padding:15px;margin-bottom:15px}
-
-.balance h1{margin:5px 0}
 
 .asset-row{
 background:#0f1a3a;
@@ -43,39 +40,25 @@ cursor:pointer
 .asset-left img{width:28px;height:28px}
 .asset-actions{display:none;gap:8px;margin-top:10px}
 .asset-actions button{
-flex:1;
-background:#1b2a5a;
-border:none;
-padding:8px;
-border-radius:8px
+flex:1;background:#1b2a5a;border:none;padding:8px;border-radius:8px
 }
 
+.search{width:100%;padding:10px;border-radius:8px;border:none;margin-bottom:10px}
 .hidden{display:none}
 
-/* MODAL */
+/* profile */
+.avatar{width:32px;height:32px;border-radius:50%}
+
+/* modal */
 .modal{
-position:fixed;
-top:0;left:0;
-width:100%;height:100%;
+position:fixed;top:0;left:0;width:100%;height:100%;
 background:rgba(0,0,0,.6);
-display:none;
-align-items:center;
-justify-content:center
+display:none;align-items:center;justify-content:center
 }
 .modal-content{
-background:#121c3b;
-padding:20px;
-border-radius:12px;
-width:90%;
-max-width:360px
+background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px
 }
-.modal-content input{
-width:100%;
-padding:10px;
-margin:8px 0;
-border:none;
-border-radius:6px
-}
+.modal-content input{width:100%;padding:10px;margin:8px 0;border:none;border-radius:6px}
 </style>
 </head>
 
@@ -87,34 +70,46 @@ border-radius:6px
     <span class="tab active" id="t_assets" onclick="showTab('assets')">Assets</span>
     <span class="tab" id="t_history" onclick="showTab('history')">History</span>
   </div>
+
   <div class="right">
+    <select onchange="changeLang(this.value)">
+      <option value="en">EN</option><option value="hi">HI</option>
+      <option value="tr">TR</option><option value="de">DE</option>
+      <option value="es">ES</option><option value="fr">FR</option>
+      <option value="pt">PT</option><option value="ru">RU</option>
+      <option value="ar">AR</option><option value="zh">ZH</option>
+      <option value="ja">JA</option><option value="ko">KO</option>
+      <option value="it">IT</option><option value="nl">NL</option>
+      <option value="pl">PL</option><option value="sv">SV</option>
+      <option value="id">ID</option><option value="th">TH</option>
+      <option value="vi">VI</option>
+    </select>
+    <img src="https://i.pravatar.cc/40" class="avatar">
     <button onclick="logout()">Logout</button>
   </div>
 </header>
 
 <div class="container">
 
-<!-- BALANCE -->
-<div class="card balance">
-  <h3>Total Balance</h3>
+<div class="card">
+  <h3 id="lbl_balance">Total Balance</h3>
   <h1>$0.00</h1>
   <small>BTC: 0.00000000</small><br><br>
   <button onclick="openModal('deposit')">Deposit</button>
   <button onclick="openModal('withdraw')">Withdraw</button>
 </div>
 
-<!-- ASSETS TAB -->
+<input class="search" placeholder="Search coin..." onkeyup="searchCoin(this.value)">
+
 <div id="assetsTab">
   <div id="assetList"></div>
 </div>
 
-<!-- HISTORY TAB -->
 <div id="historyTab" class="hidden">
   <div class="card">
-    <h3>Transaction History</h3>
+    <h3 id="lbl_history">Transaction History</h3>
     <p>Deposit • BTC • Pending</p>
     <p>Withdraw • USDT • Approved</p>
-    <p>Transfer • ETH • Completed</p>
   </div>
 </div>
 
@@ -123,17 +118,17 @@ border-radius:6px
 <!-- MODALS -->
 <div class="modal" id="depositModal">
   <div class="modal-content">
-    <h3>Deposit Request</h3>
+    <h3>Deposit</h3>
     <input placeholder="Coin">
     <input placeholder="Amount">
-    <input placeholder="Transaction ID">
+    <input placeholder="TXN ID">
     <button onclick="closeModal()">Submit</button>
   </div>
 </div>
 
 <div class="modal" id="withdrawModal">
   <div class="modal-content">
-    <h3>Withdraw Request</h3>
+    <h3>Withdraw</h3>
     <input placeholder="Coin">
     <input placeholder="Amount">
     <input placeholder="Wallet Address">
@@ -142,7 +137,22 @@ border-radius:6px
 </div>
 
 <script>
-/* TABS */
+/* ---------- LANGUAGE ---------- */
+const L={
+en:{bal:"Total Balance",his:"Transaction History"},
+hi:{bal:"कुल बैलेंस",his:"लेन-देन इतिहास"},
+tr:{bal:"Toplam Bakiye",his:"İşlem Geçmişi"},
+de:{bal:"Gesamtguthaben",his:"Verlauf"},
+es:{bal:"Balance Total",his:"Historial"},
+fr:{bal:"Solde Total",his:"Historique"}
+};
+function changeLang(l){
+const t=L[l]||L.en;
+lbl_balance.innerText=t.bal;
+lbl_history.innerText=t.his;
+}
+
+/* ---------- TABS ---------- */
 function showTab(t){
 assetsTab.classList.toggle("hidden",t!=="assets");
 historyTab.classList.toggle("hidden",t!=="history");
@@ -150,40 +160,50 @@ t_assets.classList.toggle("active",t==="assets");
 t_history.classList.toggle("active",t==="history");
 }
 
-/* ASSETS */
-const coins=[
-{name:"BTC",logo:"https://cryptologos.cc/logos/bitcoin-btc-logo.png"},
-{name:"ETH",logo:"https://cryptologos.cc/logos/ethereum-eth-logo.png"},
-{name:"USDT",logo:"https://cryptologos.cc/logos/tether-usdt-logo.png"},
-{name:"BNB",logo:"https://cryptologos.cc/logos/bnb-bnb-logo.png"},
-{name:"SOL",logo:"https://cryptologos.cc/logos/solana-sol-logo.png"}
+/* ---------- COINS (200+) ---------- */
+const symbols = [
+"BTC","ETH","USDT","BNB","SOL","XRP","ADA","DOGE","DOT","TRX",
+"LTC","AVAX","SHIB","LINK","ATOM","XMR","ETC","BCH","ICP","NEAR"
 ];
-
-assetList.innerHTML=coins.map(c=>`
-<div class="asset-row">
-  <div class="asset-head" onclick="this.nextElementSibling.style.display=
-  this.nextElementSibling.style.display==='flex'?'none':'flex'">
-    <div class="asset-left">
-      <img src="${c.logo}">
-      <strong>${c.name}</strong>
-    </div>
-    <span>0.00 ▾</span>
-  </div>
-  <div class="asset-actions">
-    <button onclick="openModal('deposit')">Deposit</button>
-    <button onclick="openModal('withdraw')">Withdraw</button>
-    <button>Transfer</button>
-    <button>Swap</button>
-  </div>
-</div>
-`).join("");
-
-/* MODAL */
-function openModal(t){document.getElementById(t+"Modal").style.display="flex"}
-function closeModal(){
-depositModal.style.display="none";
-withdrawModal.style.display="none";
+while(symbols.length<220){
+symbols.push(symbols.length+"COIN");
 }
+const coins=symbols.map(s=>({
+name:s,
+logo:`https://cryptologos.cc/logos/${s.toLowerCase()}-${s.toLowerCase()}-logo.png`
+}));
+
+let page=0, perPage=12, filtered=[...coins];
+
+function render(){
+assetList.innerHTML=filtered.slice(page*perPage,(page+1)*perPage).map(c=>`
+<div class="asset-row">
+<div class="asset-head" onclick="this.nextElementSibling.style.display=
+this.nextElementSibling.style.display==='flex'?'none':'flex'">
+<div class="asset-left">
+<img src="${c.logo}" onerror="this.src='https://cryptologos.cc/logos/generic-crypto-logo.png'">
+<strong>${c.name}</strong>
+</div>
+<span>0.00 ▾</span>
+</div>
+<div class="asset-actions">
+<button onclick="openModal('deposit')">Deposit</button>
+<button onclick="openModal('withdraw')">Withdraw</button>
+<button>Transfer</button>
+<button>Swap</button>
+</div>
+</div>`).join("");
+}
+render();
+
+function searchCoin(v){
+filtered=coins.filter(c=>c.name.includes(v.toUpperCase()));
+page=0;render();
+}
+
+/* ---------- MODAL ---------- */
+function openModal(t){document.getElementById(t+"Modal").style.display="flex"}
+function closeModal(){depositModal.style.display="none";withdrawModal.style.display="none"}
 </script>
 
 <!-- FIREBASE AUTH -->
@@ -191,26 +211,15 @@ withdrawModal.style.display="none";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
-  authDomain: "nexbit-exchange.firebaseapp.com",
-  projectId: "nexbit-exchange",
-  storageBucket: "nexbit-exchange.firebasestorage.app",
-  messagingSenderId: "944018123673",
-  appId: "1:944018123673:web:08a769c6e6afabf0aa8108"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-onAuthStateChanged(auth,(user)=>{
-if(!user) location.href="login.html";
+const app=initializeApp({
+apiKey:"AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
+authDomain:"nexbit-exchange.firebaseapp.com",
+projectId:"nexbit-exchange"
 });
-
-window.logout=()=>{
-signOut(auth).then(()=>location.href="login.html");
-};
+const auth=getAuth(app);
+onAuthStateChanged(auth,u=>{if(!u)location.href="login.html"});
+window.logout=()=>signOut(auth).then(()=>location.href="login.html");
 </script>
 
 </body>
-</html>
+        </html>
