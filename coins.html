@@ -2,120 +2,129 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Nexbit Coins</title>
+<title>Coins</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+*{box-sizing:border-box}
 body{margin:0;font-family:Arial;background:#0b1220;color:#fff}
-.container{padding:15px}
-.search{width:100%;padding:10px;border-radius:8px;border:none;margin-bottom:12px}
 
-.coin{
-background:#0f1a3a;
-border-radius:12px;
-padding:12px;
-margin-bottom:10px
+.search{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  margin:10px 0
 }
-.coin-head{
-display:flex;
-justify-content:space-between;
-align-items:center;
-cursor:pointer
+
+.asset-row{
+  background:#0f1a3a;
+  border-radius:10px;
+  margin-bottom:10px;
+  padding:12px
 }
-.coin-left{display:flex;gap:10px;align-items:center}
-.coin-left img{width:30px;height:30px}
-.price{font-weight:bold}
+.asset-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer
+}
+.asset-left{
+  display:flex;
+  gap:10px;
+  align-items:center
+}
+.asset-left img{
+  width:28px;
+  height:28px
+}
+.price{text-align:right}
 .green{color:#2ecc71}
-.red{color:#e74c3c}
+.red{color:#ff5252}
 
-.actions{
-display:none;
-margin-top:10px;
-display:flex;
-gap:8px
+.asset-actions{
+  display:none;
+  gap:8px;
+  margin-top:10px
 }
-.actions button{
-flex:1;
-background:#1b2a5a;
-border:none;
-color:#fff;
-padding:8px;
-border-radius:8px;
-cursor:pointer
+.asset-actions button{
+  flex:1;
+  background:#1b2a5a;
+  border:none;
+  color:#fff;
+  padding:8px;
+  border-radius:8px;
+  cursor:pointer
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-
 <input class="search" placeholder="Search coin..." onkeyup="searchCoin(this.value)">
 
 <div id="coinList"></div>
 
-</div>
-
 <script>
-const API =
-"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=300&page=1&sparkline=false&price_change_percentage=24h";
-
-let coins = [];
+let allCoins = [];
 let filtered = [];
 
+/* FETCH COINS FROM COINGECKO */
 async function loadCoins(){
-  const res = await fetch(API);
-  coins = await res.json();
-  filtered = coins;
+  const res = await fetch(
+    "https://api.coingecko.com/api/v3/coins/markets"+
+    "?vs_currency=usd&order=market_cap_desc"+
+    "&per_page=250&page=1&sparkline=false"+
+    "&price_change_percentage=24h"
+  );
+  const data = await res.json();
+  allCoins = data;
+  filtered = allCoins;
   render();
 }
 
 function render(){
-  const list = document.getElementById("coinList");
-  list.innerHTML = filtered.slice(0,10).map(c=>`
-    <div class="coin">
-      <div class="coin-head" onclick="toggle(this)">
-        <div class="coin-left">
-          <img src="${c.image}">
-          <div>
-            <strong>${c.symbol.toUpperCase()}</strong><br>
-            <small>${c.name}</small>
-          </div>
-        </div>
+  coinList.innerHTML = filtered.slice(0,10).map(c=>`
+  <div class="asset-row">
+    <div class="asset-head" onclick="toggleActions(this)">
+      <div class="asset-left">
+        <img src="${c.image}">
         <div>
-          <div class="price">$${c.current_price}</div>
-          <div class="${c.price_change_percentage_24h>=0?'green':'red'}">
-            ${c.price_change_percentage_24h.toFixed(2)}%
-          </div>
+          <strong>${c.symbol.toUpperCase()}</strong><br>
+          <small>${c.name}</small>
         </div>
       </div>
-
-      <div class="actions">
-        <button>Deposit</button>
-        <button>Withdraw</button>
-        <button>Transfer</button>
-        <button>Swap</button>
+      <div class="price">
+        $${c.current_price.toLocaleString()}<br>
+        <small class="${c.price_change_percentage_24h>=0?'green':'red'}">
+          ${c.price_change_percentage_24h.toFixed(2)}%
+        </small>
       </div>
     </div>
+    <div class="asset-actions">
+      <button>Deposit</button>
+      <button>Withdraw</button>
+      <button>Transfer</button>
+      <button>Swap</button>
+    </div>
+  </div>
   `).join("");
 }
 
-function toggle(el){
-  const a = el.nextElementSibling;
-  a.style.display = a.style.display==="flex"?"none":"flex";
+function toggleActions(el){
+  const box = el.nextElementSibling;
+  box.style.display = box.style.display==="flex" ? "none" : "flex";
 }
 
 function searchCoin(v){
-  filtered = coins.filter(c =>
+  filtered = allCoins.filter(c =>
     c.name.toLowerCase().includes(v.toLowerCase()) ||
     c.symbol.toLowerCase().includes(v.toLowerCase())
   );
   render();
 }
 
-/* SAFE AUTO REFRESH – 1 request / minute */
 loadCoins();
-setInterval(loadCoins,60000);
 </script>
 
 </body>
