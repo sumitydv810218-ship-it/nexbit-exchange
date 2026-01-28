@@ -2,118 +2,191 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Nexbit Dashboard</title>
+<title>Nexbit Exchange</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial;background:#0b1220;color:#fff}
-header{background:#0f1a3a;padding:15px;display:flex;justify-content:space-between;align-items:center}
-header h2{margin:0;color:#4da3ff}
-header button{background:none;border:none;color:#fff;font-size:15px;cursor:pointer}
+
+header{
+background:#0f1a3a;
+padding:12px 15px;
+display:flex;
+justify-content:space-between;
+align-items:center
+}
+header .left{display:flex;gap:15px;align-items:center}
+header .right{display:flex;gap:10px;align-items:center}
+.tab{cursor:pointer}
+.tab.active{color:#4da3ff}
+button{background:none;border:none;color:#fff;cursor:pointer}
 
 .container{padding:15px}
 .card{background:#121c3b;border-radius:12px;padding:15px;margin-bottom:15px}
+
 .balance h1{margin:5px 0}
-.btn{padding:10px 14px;border:none;border-radius:8px;cursor:pointer;margin-right:8px}
-.btn-primary{background:#4da3ff;color:#000}
-.btn-dark{background:#1b2a5a;color:#fff}
 
-.assets-header{display:flex;justify-content:space-between;align-items:center}
-.search{width:100%;padding:10px;border-radius:8px;border:none;margin:10px 0}
+.asset-row{
+background:#0f1a3a;
+border-radius:10px;
+margin-bottom:10px;
+padding:12px
+}
+.asset-head{
+display:flex;
+justify-content:space-between;
+align-items:center;
+cursor:pointer
+}
+.asset-left{display:flex;gap:10px;align-items:center}
+.asset-left img{width:28px;height:28px}
+.asset-actions{display:none;gap:8px;margin-top:10px}
+.asset-actions button{
+flex:1;
+background:#1b2a5a;
+border:none;
+padding:8px;
+border-radius:8px
+}
 
-.asset{display:flex;justify-content:space-between;align-items:center;
-background:#0f1a3a;padding:10px;border-radius:8px;margin-bottom:8px}
+.hidden{display:none}
 
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;
-background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}
-.modal-content{background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px}
-.modal-content input{width:100%;padding:10px;margin:8px 0;border:none;border-radius:6px}
-.modal-content button{width:100%;margin-top:10px}
+/* MODAL */
+.modal{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,.6);
+display:none;
+align-items:center;
+justify-content:center
+}
+.modal-content{
+background:#121c3b;
+padding:20px;
+border-radius:12px;
+width:90%;
+max-width:360px
+}
+.modal-content input{
+width:100%;
+padding:10px;
+margin:8px 0;
+border:none;
+border-radius:6px
+}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h2>Nexbit</h2>
-  <button onclick="logout()">Logout</button>
+  <div class="left">
+    <strong>Nexbit</strong>
+    <span class="tab active" id="t_assets" onclick="showTab('assets')">Assets</span>
+    <span class="tab" id="t_history" onclick="showTab('history')">History</span>
+  </div>
+  <div class="right">
+    <button onclick="logout()">Logout</button>
+  </div>
 </header>
 
 <div class="container">
 
-  <div class="card balance">
-    <h3>Total Balance</h3>
-    <h1>$0.00</h1>
-    <small>BTC: 0.00000000</small>
-    <div style="margin-top:10px">
-      <button class="btn btn-primary" onclick="openModal('deposit')">Deposit</button>
-      <button class="btn btn-dark" onclick="openModal('withdraw')">Withdraw</button>
-    </div>
-  </div>
+<!-- BALANCE -->
+<div class="card balance">
+  <h3>Total Balance</h3>
+  <h1>$0.00</h1>
+  <small>BTC: 0.00000000</small><br><br>
+  <button onclick="openModal('deposit')">Deposit</button>
+  <button onclick="openModal('withdraw')">Withdraw</button>
+</div>
 
-  <div class="card">
-    <h3>Market Chart</h3>
-    <div style="height:420px">
-      <div id="tv_chart" style="height:100%"></div>
-    </div>
-  </div>
+<!-- ASSETS TAB -->
+<div id="assetsTab">
+  <div id="assetList"></div>
+</div>
 
+<!-- HISTORY TAB -->
+<div id="historyTab" class="hidden">
   <div class="card">
-    <h3>Assets</h3>
-    <input class="search" placeholder="Search coin..." onkeyup="filterCoins(this.value)">
-    <div id="assetList"></div>
+    <h3>Transaction History</h3>
+    <p>Deposit • BTC • Pending</p>
+    <p>Withdraw • USDT • Approved</p>
+    <p>Transfer • ETH • Completed</p>
   </div>
+</div>
 
 </div>
 
+<!-- MODALS -->
 <div class="modal" id="depositModal">
   <div class="modal-content">
     <h3>Deposit Request</h3>
-    <input placeholder="Coin (e.g. BTC)">
+    <input placeholder="Coin">
     <input placeholder="Amount">
     <input placeholder="Transaction ID">
-    <button class="btn btn-primary" onclick="closeModal()">Submit</button>
+    <button onclick="closeModal()">Submit</button>
   </div>
 </div>
 
 <div class="modal" id="withdrawModal">
   <div class="modal-content">
     <h3>Withdraw Request</h3>
-    <input placeholder="Coin (e.g. BTC)">
+    <input placeholder="Coin">
     <input placeholder="Amount">
     <input placeholder="Wallet Address">
-    <button class="btn btn-primary" onclick="closeModal()">Submit</button>
+    <button onclick="closeModal()">Submit</button>
   </div>
 </div>
 
-<!-- TradingView -->
-<script src="https://s3.tradingview.com/tv.js"></script>
 <script>
-new TradingView.widget({
-  container_id: "tv_chart",
-  autosize: true,
-  symbol: "BINANCE:BTCUSDT",
-  interval: "15",
-  timezone: "Asia/Kolkata",
-  theme: "dark"
-});
-</script>
+/* TABS */
+function showTab(t){
+assetsTab.classList.toggle("hidden",t!=="assets");
+historyTab.classList.toggle("hidden",t!=="history");
+t_assets.classList.toggle("active",t==="assets");
+t_history.classList.toggle("active",t==="history");
+}
 
-<script>
-const coins=["BTC","ETH","USDT","BNB","SOL","XRP","DOGE","ADA","AVAX","TRX","DOT","MATIC","SHIB"];
-const list=document.getElementById("assetList");
+/* ASSETS */
+const coins=[
+{name:"BTC",logo:"https://cryptologos.cc/logos/bitcoin-btc-logo.png"},
+{name:"ETH",logo:"https://cryptologos.cc/logos/ethereum-eth-logo.png"},
+{name:"USDT",logo:"https://cryptologos.cc/logos/tether-usdt-logo.png"},
+{name:"BNB",logo:"https://cryptologos.cc/logos/bnb-bnb-logo.png"},
+{name:"SOL",logo:"https://cryptologos.cc/logos/solana-sol-logo.png"}
+];
 
-function render(c){list.innerHTML="";c.forEach(x=>{
-list.innerHTML+=`<div class="asset"><span>${x}</span><span>0.00</span></div>`;
-})}
-render(coins);
-function filterCoins(v){render(coins.filter(c=>c.includes(v.toUpperCase())))}
+assetList.innerHTML=coins.map(c=>`
+<div class="asset-row">
+  <div class="asset-head" onclick="this.nextElementSibling.style.display=
+  this.nextElementSibling.style.display==='flex'?'none':'flex'">
+    <div class="asset-left">
+      <img src="${c.logo}">
+      <strong>${c.name}</strong>
+    </div>
+    <span>0.00 ▾</span>
+  </div>
+  <div class="asset-actions">
+    <button onclick="openModal('deposit')">Deposit</button>
+    <button onclick="openModal('withdraw')">Withdraw</button>
+    <button>Transfer</button>
+    <button>Swap</button>
+  </div>
+</div>
+`).join("");
+
+/* MODAL */
 function openModal(t){document.getElementById(t+"Modal").style.display="flex"}
-function closeModal(){depositModal.style.display="none";withdrawModal.style.display="none"}
+function closeModal(){
+depositModal.style.display="none";
+withdrawModal.style.display="none";
+}
 </script>
 
-<!-- 🔥 FIREBASE AUTH FIX (MOST IMPORTANT) -->
+<!-- FIREBASE AUTH -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
@@ -131,17 +204,13 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 onAuthStateChanged(auth,(user)=>{
-  if(!user){
-    window.location.href="login.html";
-  }
+if(!user) location.href="login.html";
 });
 
 window.logout=()=>{
-  signOut(auth).then(()=>{
-    window.location.href="login.html";
-  });
+signOut(auth).then(()=>location.href="login.html");
 };
 </script>
 
 </body>
-  </html>
+</html>
