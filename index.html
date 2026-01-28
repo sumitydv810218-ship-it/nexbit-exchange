@@ -4,45 +4,27 @@
 <meta charset="UTF-8">
 <title>Nexbit Exchange</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial;background:#0b1220;color:#fff}
-
-/* HEADER */
-header{
-background:#0f1a3a;
-padding:12px 15px;
-display:flex;
-justify-content:space-between;
-align-items:center
-}
+header{background:#0f1a3a;padding:12px 15px;display:flex;justify-content:space-between;align-items:center}
 .left,.right{display:flex;gap:12px;align-items:center}
 .tab{cursor:pointer}
 .tab.active{color:#4da3ff}
 button,select{background:none;border:none;color:#fff;cursor:pointer}
 
 /* DRAWER */
-.drawer{
-position:fixed;top:0;left:-260px;width:260px;height:100%;
-background:#121c3b;padding:15px;transition:.3s;z-index:99
-}
+.drawer{position:fixed;top:0;left:-260px;width:260px;height:100%;background:#121c3b;padding:15px;transition:.3s;z-index:100}
 .drawer.open{left:0}
-.drawer div{padding:10px;border-bottom:1px solid #1b2a5a}
+.drawer div{padding:12px 0;border-bottom:1px solid #1b2a5a;cursor:pointer}
 
 /* PROFILE */
-.profile-menu{
-position:fixed;top:55px;right:15px;
-background:#121c3b;border-radius:10px;
-width:220px;display:none;z-index:99
-}
-.profile-menu div{padding:10px;border-bottom:1px solid #1b2a5a;cursor:pointer}
+.profile-menu{position:fixed;top:55px;right:15px;background:#121c3b;border-radius:10px;width:220px;display:none;z-index:100}
+.profile-menu div{padding:12px;border-bottom:1px solid #1b2a5a;cursor:pointer}
 .avatar{width:32px;height:32px;border-radius:50%;cursor:pointer}
 
-/* CONTENT */
 .container{padding:15px}
 .card{background:#121c3b;border-radius:12px;padding:15px;margin-bottom:15px}
-.search{width:100%;padding:10px;border-radius:8px;border:none;margin-bottom:10px}
 
 /* ASSETS */
 .asset-row{background:#0f1a3a;border-radius:10px;margin-bottom:10px;padding:12px}
@@ -51,23 +33,15 @@ width:220px;display:none;z-index:99
 .asset-left img{width:28px;height:28px}
 .asset-actions{display:none;gap:8px;margin-top:10px}
 .asset-actions button{flex:1;background:#1b2a5a;padding:8px;border-radius:8px}
-
 .hidden{display:none}
 
-/* HISTORY */
-.history-tabs span{margin-right:15px;cursor:pointer}
-.history-tabs .active{color:#4da3ff}
-.history-item{padding:10px 0;border-bottom:1px solid #1b2a5a}
+/* HISTORY MENU */
+.history-menu div{padding:14px;border-bottom:1px solid #1b2a5a;cursor:pointer;display:flex;justify-content:space-between}
+.history-menu div.active{color:#4da3ff}
 
 /* MODAL */
-.modal{
-position:fixed;top:0;left:0;width:100%;height:100%;
-background:rgba(0,0,0,.6);
-display:none;align-items:center;justify-content:center
-}
-.modal-content{
-background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px
-}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}
+.modal-content{background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px}
 .modal-content input{width:100%;padding:10px;margin:8px 0;border:none;border-radius:6px}
 </style>
 </head>
@@ -76,174 +50,124 @@ background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px
 
 <!-- DRAWER -->
 <div class="drawer" id="drawer">
-<div>Assets Overview</div>
-<div onclick="openModal('deposit')">Deposit</div>
-<div onclick="openModal('withdraw')">Withdrawal</div>
-<div>Transfer</div>
-<div>Swap</div>
+  <div onclick="goAssets()">← Assets Overview</div>
+  <div onclick="openModal('deposit')">Deposit</div>
+  <div onclick="openModal('withdraw')">Withdrawal</div>
+  <div>Transfer</div>
+  <div>Swap</div>
 </div>
 
 <header>
-<div class="left">
-<button onclick="toggleDrawer()">☰</button>
-<strong>Nexbit</strong>
-<span class="tab active" id="t_assets" onclick="showTab('assets')">Assets</span>
-<span class="tab" id="t_history" onclick="showTab('history')">History</span>
-</div>
-
-<div class="right">
-<select>
-<option>English</option>
-<option>Hindi</option>
-</select>
-<img src="https://i.pravatar.cc/40" class="avatar" onclick="toggleProfile()">
-</div>
+  <div class="left">
+    <button onclick="openDrawer()">☰</button>
+    <strong>Nexbit</strong>
+    <span class="tab active" id="t_assets" onclick="openAssets()">Assets</span>
+    <span class="tab" id="t_history" onclick="openHistory()">History</span>
+  </div>
+  <div class="right">
+    <select>
+      <option>English</option><option>Hindi</option><option>Chinese</option>
+    </select>
+    <img src="https://i.pravatar.cc/40" class="avatar" onclick="openProfile()">
+  </div>
 </header>
 
 <!-- PROFILE -->
 <div class="profile-menu" id="profileMenu">
-<div>Wallet</div>
-<div>Setting</div>
-<div>Security</div>
-<div>Identity verification</div>
-<div>Wallet connect</div>
-<div>Referral program</div>
-<div>API management</div>
-<div>Mobile app</div>
-<div onclick="logout()">Sign out</div>
+  <div>Wallet</div><div>Setting</div><div>Security</div><div>Identity verification</div>
+  <div>Wallet connect</div><div>Referral program</div><div>API management</div>
+  <div>Mobile app</div><div onclick="logout()">Sign out</div>
 </div>
 
 <div class="container">
+  <div class="card">
+    <h3>Total Balance</h3><h1>$0.00</h1><small>BTC: 0.00000000</small><br><br>
+    <button onclick="openModal('deposit')">Deposit</button>
+    <button onclick="openModal('withdraw')">Withdraw</button>
+  </div>
 
-<div class="card">
-<h3>Total Balance</h3>
-<h1>$0.00</h1>
-<small>BTC: 0.00000000</small><br><br>
-<button onclick="openModal('deposit')">Deposit</button>
-<button onclick="openModal('withdraw')">Withdraw</button>
-</div>
+  <!-- ASSETS -->
+  <div id="assetsTab">
+    <div id="assetList"></div>
+  </div>
 
-<input class="search" placeholder="Search coin..." onkeyup="searchCoin(this.value)">
-
-<!-- ASSETS -->
-<div id="assetsTab">
-<div id="assetList"></div>
-</div>
-
-<!-- HISTORY -->
-<div id="historyTab" class="hidden">
-<div class="card">
-<div class="history-tabs">
-<span class="active">All Transactions</span>
-<span>Deposit</span>
-<span>Withdrawal</span>
-<span>Transfer</span>
-<span>Earning</span>
-</div>
-<div class="history-item">Deposit • BTC • Pending</div>
-<div class="history-item">Withdrawal • USDT • Approved</div>
-<div class="history-item">Transfer • ETH • Completed</div>
-<div class="history-item">Earning • BTC • Credited</div>
-</div>
-</div>
-
+  <!-- HISTORY -->
+  <div id="historyTab" class="hidden">
+    <div class="card history-menu">
+      <div class="active" onclick="filterHistory('all',this)">All transactions ➜</div>
+      <div onclick="filterHistory('deposit',this)">Deposits ➜</div>
+      <div onclick="filterHistory('withdrawal',this)">Withdrawals ➜</div>
+      <div onclick="filterHistory('transfer',this)">Transfers ➜</div>
+      <div onclick="filterHistory('earning',this)">Earnings ➜</div>
+    </div>
+    <div class="card">
+      <div class="history-item" data-type="deposit">Deposit • BTC • Pending</div>
+      <div class="history-item" data-type="withdrawal">Withdrawal • USDT • Approved</div>
+      <div class="history-item" data-type="transfer">Transfer • ETH • Completed</div>
+      <div class="history-item" data-type="earning">Earning • BTC • Credited</div>
+    </div>
+  </div>
 </div>
 
 <!-- MODALS -->
 <div class="modal" id="depositModal">
-<div class="modal-content">
-<h3>Deposit</h3>
-<input placeholder="Coin">
-<input placeholder="Amount">
-<input placeholder="TXN ID">
-<button onclick="closeModal()">Submit</button>
+  <div class="modal-content"><h3>Deposit</h3><input placeholder="Coin"><input placeholder="Amount"><input placeholder="TXN ID"><button onclick="closeModal()">Submit</button></div>
 </div>
-</div>
-
 <div class="modal" id="withdrawModal">
-<div class="modal-content">
-<h3>Withdraw</h3>
-<input placeholder="Coin">
-<input placeholder="Amount">
-<input placeholder="Wallet Address">
-<button onclick="closeModal()">Submit</button>
-</div>
+  <div class="modal-content"><h3>Withdraw</h3><input placeholder="Coin"><input placeholder="Amount"><input placeholder="Wallet Address"><button onclick="closeModal()">Submit</button></div>
 </div>
 
 <script>
-/* CLOSE ALL */
 function closeAll(){
-drawer.classList.remove("open");
-profileMenu.style.display="none";
-assetsTab.classList.add("hidden");
-historyTab.classList.add("hidden");
+  drawer.classList.remove("open");
+  profileMenu.style.display="none";
+  assetsTab.classList.add("hidden");
+  historyTab.classList.add("hidden");
+}
+function openAssets(){ closeAll(); assetsTab.classList.remove("hidden"); t_assets.classList.add("active"); t_history.classList.remove("active"); }
+function openHistory(){ closeAll(); historyTab.classList.remove("hidden"); t_history.classList.add("active"); t_assets.classList.remove("active"); }
+function openDrawer(){ closeAll(); drawer.classList.add("open"); }
+function goAssets(){ drawer.classList.remove("open"); openAssets(); }
+function openProfile(){ closeAll(); profileMenu.style.display="block"; }
+
+function filterHistory(type,el){
+  document.querySelectorAll('.history-menu div').forEach(d=>d.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.history-item').forEach(i=>{
+    i.style.display=(type==="all"||i.dataset.type===type)?"block":"none";
+  });
 }
 
-/* TOGGLES */
-function toggleDrawer(){closeAll();drawer.classList.add("open")}
-function toggleProfile(){closeAll();profileMenu.style.display="block"}
+/* REAL COINS + REAL LOGOS */
+const coins=["BTC","ETH","USDT","BNB","SOL","XRP","ADA","DOGE","TRX","DOT","MATIC","LTC","BCH","AVAX","LINK","ATOM","ETC","XLM","NEAR","APT","FIL","HBAR","ICP","ARB","OP","IMX","INJ","SAND","MANA","EOS","AAVE","ALGO","GRT","KAVA","NEO","ZEC","DASH","XTZ","CAKE","RUNE","SHIB","PEPE","FLOKI","BONK","TIA","SEI","JASMY","WLD","ORDI","SUI","MINA","CFX","DYDX","CRV","SNX","LDO","ENS","MASK","CHZ","BAT","ZIL","QTUM","1INCH","ANKR","HOT","RVN","KSM","GLM","CELR","WAVES","SC","ONT","IOST","STORJ","ICX","OMG","ZEN","SKL","BLUR","GMX","YFI","ILV","COMP","BAL","UMA","NMR","RSR","API3","TRB","CTSI","BAND","COTI","ALPHA","FLUX","XEM","DGB","SYS"];
 
-function showTab(t){
-closeAll();
-if(t==="assets") assetsTab.classList.remove("hidden");
-if(t==="history") historyTab.classList.remove("hidden");
-t_assets.classList.toggle("active",t==="assets");
-t_history.classList.toggle("active",t==="history");
-}
-
-/* COINS */
-const base=["BTC","ETH","USDT","BNB","SOL","XRP","ADA","DOGE","TRX","DOT"];
-while(base.length<220) base.push("COIN"+base.length);
-
-const coins=base.map(c=>({
-name:c,
-logo:`https://assets.coincap.io/assets/icons/${c.toLowerCase()}@2x.png`
-}));
-
-function render(list){
-assetList.innerHTML=list.slice(0,12).map(c=>`
+assetList.innerHTML=coins.map(c=>`
 <div class="asset-row">
-<div class="asset-head" onclick="this.nextElementSibling.style.display=
-this.nextElementSibling.style.display==='flex'?'none':'flex'">
-<div class="asset-left">
-<img src="${c.logo}"
-onerror="this.onerror=null;this.src='https://cryptologos.cc/logos/generic-crypto-logo.png'">
-<strong>${c.name}</strong>
-</div><span>0.00 ▾</span>
-</div>
-<div class="asset-actions">
-<button onclick="openModal('deposit')">Deposit</button>
-<button onclick="openModal('withdraw')">Withdraw</button>
-<button>Transfer</button>
-<button>Swap</button>
-</div>
+  <div class="asset-head" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='flex'?'none':'flex'">
+    <div class="asset-left">
+      <img src="https://assets.coincap.io/assets/icons/${c.toLowerCase()}@2x.png" onerror="this.src='https://cryptologos.cc/logos/generic-crypto-logo.png'">
+      <strong>${c}</strong>
+    </div><span>0.00 ▾</span>
+  </div>
+  <div class="asset-actions">
+    <button onclick="openModal('deposit')">Deposit</button>
+    <button onclick="openModal('withdraw')">Withdraw</button>
+    <button>Transfer</button>
+    <button>Swap</button>
+  </div>
 </div>`).join("");
-}
-render(coins);
-
-function searchCoin(v){
-render(coins.filter(c=>c.name.includes(v.toUpperCase())));
-}
 
 function openModal(t){document.getElementById(t+"Modal").style.display="flex"}
 function closeModal(){depositModal.style.display="none";withdrawModal.style.display="none"}
 </script>
 
-<!-- FIREBASE -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import{getAuth,onAuthStateChanged,signOut}
-from"https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-
-const app=initializeApp({
-apiKey:"AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
-authDomain:"nexbit-exchange.firebaseapp.com",
-projectId:"nexbit-exchange"
-});
+import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+const app=initializeApp({apiKey:"AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",authDomain:"nexbit-exchange.firebaseapp.com",projectId:"nexbit-exchange"});
 const auth=getAuth(app);
 onAuthStateChanged(auth,u=>{if(!u)location.href="login.html"});
 window.logout=()=>signOut(auth).then(()=>location.href="login.html");
 </script>
-
 </body>
-</html>
+      </html>
