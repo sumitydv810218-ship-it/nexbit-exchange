@@ -1,185 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
 <title>Nexbit Exchange</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-body{background:#0b1220;color:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:#0b1220;color:#fff}
 
 /* HEADER */
-.header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 14px;background:#0f1a35
-}
-.header-left{display:flex;align-items:center;gap:10px}
-.menu-btn{font-size:22px;cursor:pointer}
-.brand{font-weight:700;font-size:18px}
-.nav a{margin:0 6px;color:#9bb2ff;text-decoration:none}
-.profile{width:34px;height:34px;border-radius:50%;overflow:hidden;cursor:pointer}
-.profile img{width:100%;height:100%}
+header{background:#0f1a3a;padding:12px 15px;display:flex;justify-content:space-between;align-items:center}
+.left,.right{display:flex;gap:12px;align-items:center}
+.tab{cursor:pointer}
+.tab.active{color:#4da3ff}
+button,select{background:none;border:none;color:#fff;cursor:pointer}
 
-/* SIDE MENU */
-.side{
-  position:fixed;top:0;left:-260px;width:260px;height:100%;
-  background:#0f1a35;transition:.3s;z-index:99;padding:15px
-}
-.side.active{left:0}
-.side h3{margin-bottom:10px}
-.side ul{list-style:none}
-.side li{padding:10px 5px;border-bottom:1px solid #1c2a55;cursor:pointer}
+/* DRAWER */
+.drawer{position:fixed;top:0;left:-260px;width:260px;height:100%;background:#121c3b;padding:15px;transition:.3s;z-index:99}
+.drawer.open{left:0}
+.drawer .back{cursor:pointer;margin-bottom:15px;color:#4da3ff}
+.drawer div{padding:10px 0;border-bottom:1px solid #1b2a5a}
 
-/* PROFILE DROPDOWN */
-.profile-box{
-  position:absolute;right:10px;top:60px;
-  background:#0f1a35;border-radius:8px;
-  display:none;width:180px
-}
-.profile-box.active{display:block}
-.profile-box div{padding:10px;border-bottom:1px solid #1c2a55}
+/* PROFILE */
+.avatar{width:32px;height:32px;border-radius:50%;cursor:pointer}
+.profile-menu{position:fixed;top:60px;right:15px;background:#121c3b;border-radius:10px;width:230px;display:none;z-index:99}
+.profile-menu div{padding:10px;border-bottom:1px solid #1b2a5a;cursor:pointer}
 
-/* CARDS */
-.card{
-  background:#0f1a35;margin:14px;border-radius:12px;padding:16px
-}
-.balance{font-size:32px;margin:8px 0}
-.btns span{margin-right:15px;color:#9bb2ff;cursor:pointer}
+/* CONTENT */
+.container{padding:15px}
+.card{background:#121c3b;border-radius:12px;padding:15px;margin-bottom:15px}
+.hidden{display:none}
 
-/* SEARCH */
-.search-box{margin:10px}
-.search-box input{
-  width:100%;padding:10px;border-radius:8px;border:none;
-  background:#0b1220;color:#fff
-}
-
-/* COINS */
-.coin{display:flex;align-items:center;justify-content:space-between;
-  padding:12px;margin:10px 14px;border-radius:12px;
-  background:#0f1a35
-}
-.coin-left{display:flex;align-items:center;gap:10px}
-.coin img{width:28px;height:28px}
+/* ASSETS */
+.search{width:100%;padding:10px;border-radius:8px;border:none;margin-bottom:10px}
+.asset-row{background:#0f1a3a;border-radius:10px;margin-bottom:10px;padding:12px}
+.asset-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.asset-left{display:flex;gap:10px;align-items:center}
+.asset-left img{width:28px;height:28px}
+.asset-actions{display:none;gap:8px;margin-top:10px}
+.asset-actions button{flex:1;background:#1b2a5a;padding:8px;border-radius:8px}
 
 /* HISTORY */
-.history-item{
-  padding:12px;border-bottom:1px solid #1c2a55
-}
+.history-tabs span{margin-right:15px;cursor:pointer}
+.history-tabs .active{color:#4da3ff}
+
+/* MODAL */
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center}
+.modal-content{background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px}
+.modal-content input{width:100%;padding:10px;margin:8px 0;border:none;border-radius:6px}
 </style>
 </head>
+
 <body>
 
-<!-- SIDE MENU -->
-<div class="side" id="sideMenu">
-  <h3>Menu</h3>
-  <ul>
-    <li onclick="showAssets()">Assets overview</li>
-    <li>Deposit</li>
-    <li>Withdrawal</li>
-    <li>Transfer</li>
-    <li>Swap</li>
-  </ul>
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+<div class="back" onclick="closeDrawer()">← Back</div>
+<div onclick="showAssets()">Assets Overview</div>
+<div onclick="openModal('deposit')">Deposit</div>
+<div onclick="openModal('withdraw')">Withdrawal</div>
+<div>Transfer</div>
+<div>Swap</div>
 </div>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-left">
-    <div class="menu-btn" onclick="toggleMenu()">☰</div>
-    <div class="brand">Nexbit</div>
-  </div>
-  <div class="nav">
-    <a href="#">Assets</a>
-    <a href="#">History</a>
-  </div>
-  <div class="profile" onclick="toggleProfile()">
-    <img src="https://i.pravatar.cc/100">
-  </div>
+<header>
+<div class="left">
+<button onclick="toggleDrawer()">☰</button>
+<strong>Nexbit</strong>
+<span class="tab active" id="t_assets" onclick="showAssets()">Assets</span>
+<span class="tab" id="t_history" onclick="showHistory()">History</span>
 </div>
 
-<!-- PROFILE DROPDOWN -->
-<div class="profile-box" id="profileBox">
-  <div>Overview</div>
-  <div>Security</div>
-  <div>Logout</div>
+<div class="right">
+<select onchange="changeLang(this.value)">
+<option>English</option><option>Hindi</option><option>Chinese</option>
+<option>French</option><option>German</option><option>Russian</option>
+</select>
+<img src="https://i.pravatar.cc/40" class="avatar" onclick="toggleProfile()">
 </div>
+</header>
+
+<!-- PROFILE -->
+<div class="profile-menu" id="profileMenu">
+<div>Wallet</div>
+<div>Setting</div>
+<div>Security</div>
+<div>Identity Verification</div>
+<div>Wallet Connect</div>
+<div>Referral Program</div>
+<div>API Management</div>
+<div>Mobile App</div>
+<div onclick="logout()">Sign Out</div>
+</div>
+
+<div class="container">
 
 <!-- BALANCE -->
 <div class="card">
-  <div>Total Balance</div>
-  <div class="balance">$0.00</div>
-  <div>BTC: 0.00000000</div>
-  <div class="btns">
-    <span>Deposit</span>
-    <span>Withdraw</span>
-  </div>
+<h3>Total Balance</h3>
+<h1>$0.00</h1>
+<small>BTC: 0.00000000</small><br><br>
+<button onclick="openModal('deposit')">Deposit</button>
+<button onclick="openModal('withdraw')">Withdraw</button>
 </div>
 
-<!-- SEARCH -->
-<div class="search-box">
-  <input type="text" id="search" placeholder="Search coin..." onkeyup="filterCoins()">
+<!-- ASSETS -->
+<div id="assetsPage">
+<input class="search" placeholder="Search coin..." onkeyup="searchCoin(this.value)">
+<div id="assetList"></div>
 </div>
-
-<!-- COINS -->
-<div id="coinList"></div>
 
 <!-- HISTORY -->
+<div id="historyPage" class="hidden">
 <div class="card">
-  <h3>History</h3>
-  <div class="history-item">All transactions</div>
-  <div class="history-item">Deposit</div>
-  <div class="history-item">Withdrawal</div>
-  <div class="history-item">Transfer</div>
-  <div class="history-item">Earning</div>
+<div class="history-tabs">
+<span class="active">All Transactions</span>
+<span>Deposit</span>
+<span>Withdrawal</span>
+<span>Transfer</span>
+<span>Earning</span>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- MODALS -->
+<div class="modal" id="depositModal">
+<div class="modal-content">
+<h3>Deposit</h3>
+<input placeholder="Coin"><input placeholder="Amount"><input placeholder="TXN ID">
+<button onclick="closeModal()">Submit</button>
+</div>
+</div>
+
+<div class="modal" id="withdrawModal">
+<div class="modal-content">
+<h3>Withdraw</h3>
+<input placeholder="Coin"><input placeholder="Amount"><input placeholder="Wallet Address">
+<button onclick="closeModal()">Submit</button>
+</div>
 </div>
 
 <script>
-let sideOpen=false;
-function toggleMenu(){
-  sideOpen=!sideOpen;
-  document.getElementById("sideMenu").classList.toggle("active");
-}
-function showAssets(){
-  document.getElementById("sideMenu").classList.remove("active");
-}
+/* UI TOGGLES */
+function toggleDrawer(){drawer.classList.toggle("open");closeProfile()}
+function closeDrawer(){drawer.classList.remove("open")}
 function toggleProfile(){
-  document.getElementById("profileBox").classList.toggle("active");
+profileMenu.style.display=profileMenu.style.display==="block"?"none":"block"
+closeDrawer()
+}
+function closeProfile(){profileMenu.style.display="none"}
+
+function showAssets(){
+assetsPage.classList.remove("hidden")
+historyPage.classList.add("hidden")
+t_assets.classList.add("active")
+t_history.classList.remove("active")
+closeDrawer();closeProfile()
+}
+function showHistory(){
+historyPage.classList.remove("hidden")
+assetsPage.classList.add("hidden")
+t_history.classList.add("active")
+t_assets.classList.remove("active")
+closeDrawer();closeProfile()
 }
 
-/* FETCH 200 REAL COINS WITH LOGO */
-let coins=[];
-fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=200&page=1")
-.then(res=>res.json())
-.then(data=>{
-  coins=data;
-  renderCoins(coins.slice(0,10)); // default 10
+/* 200+ REAL COINS */
+const symbols=[
+"BTC","ETH","USDT","BNB","SOL","XRP","ADA","DOGE","TRX","DOT","MATIC","AVAX","SHIB",
+"LTC","LINK","ATOM","XMR","ETC","BCH","ICP","NEAR","FIL","HBAR","APT","OP","ARB",
+"SUI","INJ","AAVE","EGLD","VET","ALGO","XTZ","EOS","KAVA","FLOW","CAKE","RUNE",
+"THETA","GALA","SAND","MANA","AXS","NEO","ZEC","DASH","ENJ","CHZ","CRV","1INCH",
+"FTM","ROSE","MINA","CELO","IOTA","WAVES","COMP","BAT","ZIL","OMG","QTUM",
+"ANKR","KSM","GLMR","LRC","SNX","YFI","BNT","STORJ","ICX","SC","ONT","SKL"
+];
+while(symbols.length<210) symbols.push("TOKEN"+symbols.length);
+
+const coins=symbols.map(s=>({
+name:s,
+logo:`https://cryptologos.cc/logos/${s.toLowerCase()}-${s.toLowerCase()}-logo.png`
+}));
+
+let filtered=[...coins];
+
+function render(){
+assetList.innerHTML=filtered.slice(0,10).map(c=>`
+<div class="asset-row">
+<div class="asset-head" onclick="this.nextElementSibling.style.display=
+this.nextElementSibling.style.display==='flex'?'none':'flex'">
+<div class="asset-left">
+<img src="${c.logo}" onerror="this.src='https://cryptologos.cc/logos/generic-crypto-logo.png'">
+<strong>${c.name}</strong>
+</div>
+<span>0.00 ▾</span>
+</div>
+<div class="asset-actions">
+<button onclick="openModal('deposit')">Deposit</button>
+<button onclick="openModal('withdraw')">Withdraw</button>
+<button>Transfer</button>
+<button>Swap</button>
+</div>
+</div>
+`).join("");
+}
+render();
+
+function searchCoin(v){
+filtered=coins.filter(c=>c.name.includes(v.toUpperCase()));
+render();
+}
+
+/* MODAL */
+function openModal(t){document.getElementById(t+"Modal").style.display="flex"}
+function closeModal(){depositModal.style.display="none";withdrawModal.style.display="none"}
+</script>
+
+<!-- FIREBASE AUTH -->
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import{getAuth,onAuthStateChanged,signOut}
+from"https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+
+const app=initializeApp({
+apiKey:"AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
+authDomain:"nexbit-exchange.firebaseapp.com",
+projectId:"nexbit-exchange"
 });
-
-function renderCoins(list){
-  let html="";
-  list.forEach(c=>{
-    html+=`
-    <div class="coin">
-      <div class="coin-left">
-        <img src="${c.image}">
-        <div>${c.symbol.toUpperCase()}</div>
-      </div>
-      <div>0.00</div>
-    </div>`;
-  });
-  document.getElementById("coinList").innerHTML=html;
-}
-
-function filterCoins(){
-  let q=document.getElementById("search").value.toLowerCase();
-  if(q===""){
-    renderCoins(coins.slice(0,10));
-  }else{
-    let f=coins.filter(c=>c.name.toLowerCase().includes(q)||c.symbol.toLowerCase().includes(q));
-    renderCoins(f);
-  }
-}
+const auth=getAuth(app);
+onAuthStateChanged(auth,u=>{if(!u)location.href="login.html"});
+window.logout=()=>signOut(auth).then(()=>location.href="login.html");
 </script>
 
 </body>
-</html>
+  </html>
