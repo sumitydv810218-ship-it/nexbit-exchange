@@ -17,7 +17,7 @@ display:flex;
 justify-content:space-between;
 align-items:center
 }
-.left, .right{display:flex;gap:12px;align-items:center}
+.left,.right{display:flex;gap:12px;align-items:center}
 .tab{cursor:pointer}
 .tab.active{color:#4da3ff}
 button,select{background:none;border:none;color:#fff;cursor:pointer}
@@ -28,12 +28,11 @@ position:fixed;top:0;left:-260px;width:260px;height:100%;
 background:#121c3b;padding:15px;transition:.3s;z-index:99
 }
 .drawer.open{left:0}
-.drawer h3{margin-top:0}
-.drawer div{padding:10px 0;border-bottom:1px solid #1b2a5a}
+.drawer div{padding:10px;border-bottom:1px solid #1b2a5a}
 
 /* PROFILE */
 .profile-menu{
-position:absolute;top:55px;right:15px;
+position:fixed;top:55px;right:15px;
 background:#121c3b;border-radius:10px;
 width:220px;display:none;z-index:99
 }
@@ -77,7 +76,6 @@ background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px
 
 <!-- DRAWER -->
 <div class="drawer" id="drawer">
-<h3>Menu</h3>
 <div>Assets Overview</div>
 <div onclick="openModal('deposit')">Deposit</div>
 <div onclick="openModal('withdraw')">Withdrawal</div>
@@ -94,13 +92,9 @@ background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px
 </div>
 
 <div class="right">
-<select onchange="changeLang(this.value)">
-<option value="en">English</option>
-<option value="hi">Hindi</option>
-<option value="zh">Chinese</option>
-<option value="fr">French</option>
-<option value="de">German</option>
-<option value="ru">Russian</option>
+<select>
+<option>English</option>
+<option>Hindi</option>
 </select>
 <img src="https://i.pravatar.cc/40" class="avatar" onclick="toggleProfile()">
 </div>
@@ -122,7 +116,7 @@ background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px
 <div class="container">
 
 <div class="card">
-<h3 id="lbl_balance">Total Balance</h3>
+<h3>Total Balance</h3>
 <h1>$0.00</h1>
 <small>BTC: 0.00000000</small><br><br>
 <button onclick="openModal('deposit')">Deposit</button>
@@ -177,13 +171,22 @@ background:#121c3b;padding:20px;border-radius:12px;width:90%;max-width:360px
 </div>
 
 <script>
-function toggleDrawer(){drawer.classList.toggle("open")}
-function toggleProfile(){profileMenu.style.display=
-profileMenu.style.display==="block"?"none":"block"}
+/* CLOSE ALL */
+function closeAll(){
+drawer.classList.remove("open");
+profileMenu.style.display="none";
+assetsTab.classList.add("hidden");
+historyTab.classList.add("hidden");
+}
+
+/* TOGGLES */
+function toggleDrawer(){closeAll();drawer.classList.add("open")}
+function toggleProfile(){closeAll();profileMenu.style.display="block"}
 
 function showTab(t){
-assetsTab.classList.toggle("hidden",t!=="assets");
-historyTab.classList.toggle("hidden",t!=="history");
+closeAll();
+if(t==="assets") assetsTab.classList.remove("hidden");
+if(t==="history") historyTab.classList.remove("hidden");
 t_assets.classList.toggle("active",t==="assets");
 t_history.classList.toggle("active",t==="history");
 }
@@ -192,9 +195,9 @@ t_history.classList.toggle("active",t==="history");
 const base=["BTC","ETH","USDT","BNB","SOL","XRP","ADA","DOGE","TRX","DOT"];
 while(base.length<220) base.push("COIN"+base.length);
 
-const coins=base.map(s=>({
-name:s,
-logo:`https://cryptologos.cc/logos/${s.toLowerCase()}-${s.toLowerCase()}-logo.png`
+const coins=base.map(c=>({
+name:c,
+logo:`https://assets.coincap.io/assets/icons/${c.toLowerCase()}@2x.png`
 }));
 
 function render(list){
@@ -203,7 +206,8 @@ assetList.innerHTML=list.slice(0,12).map(c=>`
 <div class="asset-head" onclick="this.nextElementSibling.style.display=
 this.nextElementSibling.style.display==='flex'?'none':'flex'">
 <div class="asset-left">
-<img src="${c.logo}" onerror="this.src='https://cryptologos.cc/logos/generic-crypto-logo.png'">
+<img src="${c.logo}"
+onerror="this.onerror=null;this.src='https://cryptologos.cc/logos/generic-crypto-logo.png'">
 <strong>${c.name}</strong>
 </div><span>0.00 ▾</span>
 </div>
@@ -242,4 +246,4 @@ window.logout=()=>signOut(auth).then(()=>location.href="login.html");
 </script>
 
 </body>
-  </html>
+</html>
