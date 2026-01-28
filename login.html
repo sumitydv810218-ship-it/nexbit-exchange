@@ -2,14 +2,14 @@
 <html>
 <head>
 <title>Nexbit Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 body{background:#0b1220;color:#fff;font-family:Arial}
-form{max-width:300px;margin:100px auto}
-input,button{width:100%;padding:10px;margin:10px 0}
-button{background:#4da3ff;border:none}
+form{max-width:320px;margin:80px auto}
+input,button{width:100%;padding:10px;margin:10px 0;border-radius:8px;border:none}
+button{background:#4da3ff}
 </style>
 </head>
-
 <body>
 
 <form id="loginForm">
@@ -20,38 +20,33 @@ button{background:#4da3ff;border:none}
 <p id="msg"></p>
 </form>
 
-<!-- 🔥 Firebase Login Script -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } 
-  from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
-    authDomain: "nexbit-exchange.firebaseapp.com",
-    projectId: "nexbit-exchange",
-    storageBucket: "nexbit-exchange.firebasestorage.app",
-    messagingSenderId: "944018123673",
-    appId: "1:944018123673:web:08a769c6e6afabf0aa8108"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
+  authDomain: "nexbit-exchange.firebaseapp.com",
+  projectId: "nexbit-exchange",
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-  document.getElementById("loginForm").addEventListener("submit", (e) => {
-    e.preventDefault();
+document.getElementById("loginForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const email = email.value;
+  const password = password.value;
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        window.location.href = "dashboard.html";
-      })
-      .catch((error) => {
-        document.getElementById("msg").innerText = error.message;
-      });
+  signInWithEmailAndPassword(auth,email,password)
+  .then(()=>{
+    window.location.href="dashboard.html";
+  })
+  .catch(err=>{
+    msg.innerText = err.message;
   });
+});
 </script>
 
 </body>
