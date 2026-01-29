@@ -73,19 +73,19 @@ body{
 <div id="coinList"></div>
 
 <script>
-const coins = [
- "bitcoin","ethereum","tether","bnb","solana",
- "xrp","usdc","dogecoin","tron","polygon"
-];
-
 let lastPrice = {};
+let allCoins = [];
 
-async function loadCoins(){
+// Load 300+ coins
+async function fetchCoins(){
   const url =
-   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+coins.join(",");
+   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=300&page=1&sparkline=false";
   const res = await fetch(url);
-  const data = await res.json();
+  allCoins = await res.json();
+  renderCoins(allCoins.slice(0,10)); // default 10
+}
 
+function renderCoins(data){
   const list = document.getElementById("coinList");
   list.innerHTML = "";
 
@@ -127,14 +127,19 @@ function toggle(id){
 
 document.getElementById("search").oninput = e=>{
   const v = e.target.value.toLowerCase();
-  document.querySelectorAll(".coin").forEach(c=>{
-    c.style.display =
-      c.innerText.toLowerCase().includes(v) ? "flex":"none";
-  });
+  if(!v){
+    renderCoins(allCoins.slice(0,10));
+    return;
+  }
+  const filtered = allCoins.filter(c =>
+    c.name.toLowerCase().includes(v) ||
+    c.symbol.toLowerCase().includes(v)
+  );
+  renderCoins(filtered);
 };
 
-loadCoins();
-setInterval(loadCoins, 15000);
+fetchCoins();
+setInterval(fetchCoins, 15000);
 </script>
 
 </body>
