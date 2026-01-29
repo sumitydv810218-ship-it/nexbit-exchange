@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
 <title>Coins</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
   margin:0;
+  font-family:Arial;
   background:#0b1220;
   color:#fff;
-  font-family:Arial,Helvetica,sans-serif;
 }
 .search{
   padding:10px;
 }
-input{
+.search input{
   width:100%;
   padding:10px;
   border-radius:8px;
@@ -25,43 +25,42 @@ input{
 .coin{
   display:flex;
   justify-content:space-between;
+  align-items:center;
   padding:12px;
-  border-bottom:1px solid #1f2a44;
+  border-bottom:1px solid #1b2a5a;
   cursor:pointer;
 }
-.coin:hover{background:#111a33;}
-.green{color:#2ecc71; animation:blink 0.5s;}
-.red{color:#e74c3c; animation:blink 0.5s;}
-@keyframes blink{
-  0%{opacity:0.5}
-  100%{opacity:1}
+.coin-left{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.coin img{
+  width:26px;
+  height:26px;
+}
+.price.up{color:#2ecc71; animation:flash 0.4s}
+.price.down{color:#e74c3c; animation:flash 0.4s}
+
+@keyframes flash{
+  from{opacity:0.3}
+  to{opacity:1}
 }
 
-/* modal */
-.modal{
-  position:fixed;
-  top:0;left:0;right:0;bottom:0;
-  background:rgba(0,0,0,.7);
+.actions{
   display:none;
-  align-items:center;
-  justify-content:center;
-}
-.box{
-  background:#121c35;
-  width:90%;
-  border-radius:12px;
-  padding:15px;
-}
-.btn{
-  width:48%;
+  background:#121c3b;
   padding:10px;
-  border:none;
-  border-radius:8px;
-  color:#fff;
-  cursor:pointer;
 }
-.deposit{background:#2ecc71;}
-.withdraw{background:#e67e22;}
+.actions button{
+  width:100%;
+  margin:5px 0;
+  padding:8px;
+  border:none;
+  border-radius:6px;
+  background:#1b2a5a;
+  color:#fff;
+}
 </style>
 </head>
 
@@ -71,70 +70,71 @@ input{
   <input id="search" placeholder="Search coin...">
 </div>
 
-<div id="coins"></div>
-
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="box">
-    <h3 id="m-name"></h3>
-    <p>Price: $<span id="m-price"></span></p>
-    <p>24h: <span id="m-change"></span>%</p>
-    <p>Market Cap: $<span id="m-cap"></span></p>
-    <p>Volume: $<span id="m-vol"></span></p>
-
-    <div style="display:flex;justify-content:space-between">
-      <button class="btn deposit">Deposit</button>
-      <button class="btn withdraw">Withdraw</button>
-    </div>
-  </div>
-</div>
+<div id="coinList"></div>
 
 <script>
-const API =
-"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=300&page=1&sparkline=false&price_change_percentage=24h";
+const coins = [
+ "bitcoin","ethereum","tether","bnb","solana",
+ "xrp","usdc","dogecoin","tron","polygon"
+];
 
-let coinsData=[];
+let lastPrice = {};
 
 async function loadCoins(){
-  const res = await fetch(API);
-  coinsData = await res.json();
-  renderCoins(coinsData.slice(0,10));
-}
-loadCoins();
-setInterval(loadCoins,30000);
+  const url =
+   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids="+coins.join(",");
+  const res = await fetch(url);
+  const data = await res.json();
 
-function renderCoins(data){
-  const box=document.getElementById("coins");
-  box.innerHTML="";
+  const list = document.getElementById("coinList");
+  list.innerHTML = "";
+
   data.forEach(c=>{
-    const div=document.createElement("div");
-    div.className="coin";
-    div.innerHTML=`
-      <span>${c.symbol.toUpperCase()}</span>
-      <span class="${c.price_change_percentage_24h>=0?'green':'red'}">
-        $${c.current_price}
-      </span>`;
-    div.onclick=()=>openModal(c);
-    box.appendChild(div);
+    let dir = "";
+    if(lastPrice[c.id]){
+      dir = c.current_price > lastPrice[c.id] ? "up" : "down";
+    }
+    lastPrice[c.id] = c.current_price;
+
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <div class="coin" onclick="toggle('${c.id}')">
+        <div class="coin-left">
+          <img src="${c.image}">
+          <div>
+            <strong>${c.symbol.toUpperCase()}</strong><br>
+            <small>${c.name}</small>
+          </div>
+        </div>
+        <div class="price ${dir}">$${c.current_price}</div>
+      </div>
+
+      <div class="actions" id="a_${c.id}">
+        <button>Deposit</button>
+        <button>Withdraw</button>
+        <button>Transfer</button>
+        <button>Trade</button>
+      </div>
+    `;
+    list.appendChild(div);
   });
 }
 
-document.getElementById("search").oninput=e=>{
-  const v=e.target.value.toLowerCase();
-  renderCoins(coinsData.filter(c=>c.name.toLowerCase().includes(v)));
+function toggle(id){
+  const el = document.getElementById("a_"+id);
+  el.style.display = el.style.display==="block"?"none":"block";
+}
+
+document.getElementById("search").oninput = e=>{
+  const v = e.target.value.toLowerCase();
+  document.querySelectorAll(".coin").forEach(c=>{
+    c.style.display =
+      c.innerText.toLowerCase().includes(v) ? "flex":"none";
+  });
 };
 
-function openModal(c){
-  document.getElementById("modal").style.display="flex";
-  document.getElementById("m-name").innerText=c.name;
-  document.getElementById("m-price").innerText=c.current_price;
-  document.getElementById("m-change").innerText=c.price_change_percentage_24h.toFixed(2);
-  document.getElementById("m-cap").innerText=c.market_cap;
-  document.getElementById("m-vol").innerText=c.total_volume;
-}
-document.getElementById("modal").onclick=e=>{
-  if(e.target.id==="modal") e.target.style.display="none";
-};
+loadCoins();
+setInterval(loadCoins, 15000);
 </script>
 
 </body>
