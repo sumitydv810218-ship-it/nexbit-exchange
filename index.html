@@ -15,7 +15,10 @@ header{
   padding:12px 15px;
   display:flex;
   justify-content:space-between;
-  align-items:center
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:10;
 }
 .left,.right{display:flex;gap:12px;align-items:center}
 .tab{cursor:pointer}
@@ -32,7 +35,6 @@ button,select{background:none;border:none;color:#fff;cursor:pointer;font-size:16
   z-index:99
 }
 .drawer.open{left:0}
-.drawer .back{cursor:pointer;margin-bottom:15px;color:#4da3ff}
 .drawer div{padding:10px 0;border-bottom:1px solid #1b2a5a}
 
 /* PROFILE */
@@ -69,43 +71,6 @@ iframe{
   border-radius:12px;
   background:#0b1220
 }
-
-/* HISTORY */
-.history-list{
-  background:#121c3b;
-  border-radius:12px;
-  padding:10px
-}
-.history-item{
-  padding:12px;
-  border-bottom:1px solid #1b2a5a;
-}
-.history-item:last-child{border-bottom:none}
-.history-title{font-weight:bold;color:#4da3ff}
-
-/* MODAL */
-.modal{
-  position:fixed;top:0;left:0;
-  width:100%;height:100%;
-  background:rgba(0,0,0,.6);
-  display:none;
-  align-items:center;
-  justify-content:center
-}
-.modal-content{
-  background:#121c3b;
-  padding:20px;
-  border-radius:12px;
-  width:90%;
-  max-width:360px
-}
-.modal-content input{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border:none;
-  border-radius:6px
-}
 </style>
 </head>
 
@@ -113,12 +78,9 @@ iframe{
 
 <!-- DRAWER -->
 <div class="drawer" id="drawer">
-  <div class="back" onclick="closeDrawer()">← Back</div>
-  <div onclick="showAssets()">Assets Overview</div>
+  <div onclick="showAssets()">Assets</div>
   <div onclick="openModal('deposit')">Deposit</div>
-  <div onclick="openModal('withdraw')">Withdrawal</div>
-  <div>Transfer</div>
-  <div>Swap</div>
+  <div onclick="openModal('withdraw')">Withdraw</div>
 </div>
 
 <header>
@@ -133,10 +95,6 @@ iframe{
     <select>
       <option>English</option>
       <option>Hindi</option>
-      <option>Chinese</option>
-      <option>French</option>
-      <option>German</option>
-      <option>Russian</option>
     </select>
     <img src="https://i.pravatar.cc/40" class="avatar" onclick="toggleProfile()">
   </div>
@@ -145,19 +103,13 @@ iframe{
 <!-- PROFILE -->
 <div class="profile-menu" id="profileMenu">
   <div>Wallet</div>
-  <div>Setting</div>
   <div>Security</div>
-  <div>Identity Verification</div>
-  <div>Wallet Connect</div>
-  <div>Referral Program</div>
-  <div>API Management</div>
-  <div>Mobile App</div>
   <div onclick="logout()">Sign Out</div>
 </div>
 
 <div class="container">
 
-<!-- BALANCE -->
+<!-- BALANCE (ONLY ONCE) -->
 <div class="card">
   <h3>Total Balance</h3>
   <h1>$0.00</h1>
@@ -166,60 +118,34 @@ iframe{
   <button onclick="openModal('withdraw')">Withdraw</button>
 </div>
 
-<!-- ASSETS PAGE -->
+<!-- ASSETS -->
 <div id="assetsPage">
-  <iframe src="coin.html"></iframe>
+  <iframe src="/coin.html"></iframe>
 </div>
 
-<!-- HISTORY PAGE -->
+<!-- HISTORY -->
 <div id="historyPage" class="hidden">
-  <div class="history-list">
-    <div class="history-item">
-      <div class="history-title">All Transactions</div>
-    </div>
-    <div class="history-item">Deposit</div>
-    <div class="history-item">Withdrawal</div>
-    <div class="history-item">Transfer</div>
-    <div class="history-item">Earning</div>
-  </div>
+  <div class="card">No history yet</div>
 </div>
 
 </div>
 
 <!-- MODALS -->
-<div class="modal" id="depositModal">
-  <div class="modal-content">
-    <h3>Deposit</h3>
-    <input placeholder="Coin">
-    <input placeholder="Amount">
-    <input placeholder="TXN ID">
-    <button onclick="closeModal()">Submit</button>
-  </div>
-</div>
-
-<div class="modal" id="withdrawModal">
-  <div class="modal-content">
-    <h3>Withdraw</h3>
-    <input placeholder="Coin">
-    <input placeholder="Amount">
-    <input placeholder="Wallet Address">
-    <button onclick="closeModal()">Submit</button>
-  </div>
-</div>
+<div class="modal" id="depositModal"></div>
+<div class="modal" id="withdrawModal"></div>
 
 <script>
-function toggleDrawer(){
-  drawer.classList.toggle("open");
-  closeProfile();
-}
-function closeDrawer(){drawer.classList.remove("open")}
-function toggleProfile(){
-  profileMenu.style.display =
-    profileMenu.style.display==="block"?"none":"block";
-  closeDrawer();
-}
-function closeProfile(){profileMenu.style.display="none"}
+const drawer=document.getElementById("drawer");
+const profileMenu=document.getElementById("profileMenu");
+const assetsPage=document.getElementById("assetsPage");
+const historyPage=document.getElementById("historyPage");
+const t_assets=document.getElementById("t_assets");
+const t_history=document.getElementById("t_history");
 
+function toggleDrawer(){drawer.classList.toggle("open")}
+function toggleProfile(){
+  profileMenu.style.display=profileMenu.style.display==="block"?"none":"block";
+}
 function showAssets(){
   assetsPage.classList.remove("hidden");
   historyPage.classList.add("hidden");
@@ -232,37 +158,9 @@ function showHistory(){
   t_history.classList.add("active");
   t_assets.classList.remove("active");
 }
-
-function openModal(t){
-  document.getElementById(t+"Modal").style.display="flex";
-}
-function closeModal(){
-  depositModal.style.display="none";
-  withdrawModal.style.display="none";
-}
-</script>
-
-<!-- FIREBASE AUTH -->
-<script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import{getAuth,onAuthStateChanged,signOut}
-from"https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-
-const app=initializeApp({
-  apiKey:"AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
-  authDomain:"nexbit-exchange.firebaseapp.com",
-  projectId:"nexbit-exchange"
-});
-const auth=getAuth(app);
-
-onAuthStateChanged(auth,u=>{
-  if(!u) location.href="login.html";
-});
-
-window.logout=()=>{
-  signOut(auth).then(()=>location.href="login.html");
-};
+function openModal(){}
+function logout(){location.href="login.html";}
 </script>
 
 </body>
-  </html>
+</html>
