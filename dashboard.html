@@ -1,7 +1,164 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta http-equiv="refresh" content="0; url=index.html">
+<meta charset="UTF-8">
+<title>Nexbit Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:#0b1220;color:#fff}
+
+header{
+  background:#0f1a3a;
+  padding:12px 15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
+.left,.right{display:flex;gap:12px;align-items:center}
+.tab{cursor:pointer}
+.tab.active{color:#4da3ff}
+
+button,select{
+  background:none;border:none;color:#fff;
+  cursor:pointer;font-size:16px
+}
+
+/* DRAWER */
+.drawer{
+  position:fixed;top:0;left:-260px;
+  width:260px;height:100%;
+  background:#121c3b;
+  padding:15px;
+  transition:.3s;
+  z-index:99
+}
+.drawer.open{left:0}
+.drawer div{padding:12px;border-bottom:1px solid #1b2a5a;cursor:pointer}
+
+/* PROFILE */
+.avatar{width:34px;height:34px;border-radius:50%;cursor:pointer}
+.profile-menu{
+  position:fixed;top:60px;right:15px;
+  background:#121c3b;
+  border-radius:10px;
+  width:230px;
+  display:none;
+  z-index:99
+}
+.profile-menu div{
+  padding:12px;
+  border-bottom:1px solid #1b2a5a;
+  cursor:pointer
+}
+
+/* CONTENT */
+.container{padding:15px}
+.card{
+  background:#121c3b;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:15px
+}
+.hidden{display:none}
+
+/* IFRAME */
+iframe{
+  width:100%;
+  height:75vh;
+  border:none;
+  border-radius:12px;
+}
+</style>
 </head>
-<body></body>
+
+<body>
+
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <div onclick="showAssets()">Assets</div>
+  <div onclick="showHistory()">History</div>
+  <div>Transfer</div>
+  <div>Swap</div>
+</div>
+
+<header>
+  <div class="left">
+    <button onclick="toggleDrawer()">☰</button>
+    <strong>Nexbit</strong>
+    <span class="tab active" id="tabAssets" onclick="showAssets()">Assets</span>
+    <span class="tab" id="tabHistory" onclick="showHistory()">History</span>
+  </div>
+
+  <div class="right">
+    <select onchange="alert('Language switched (demo)')">
+      <option>English</option>
+      <option>Hindi</option>
+    </select>
+    <img src="https://i.pravatar.cc/40" class="avatar" onclick="toggleProfile()">
+  </div>
+</header>
+
+<!-- PROFILE -->
+<div class="profile-menu" id="profile">
+  <div>Wallet</div>
+  <div>Security</div>
+  <div>Referral</div>
+  <div>Settings</div>
+</div>
+
+<div class="container">
+
+<div class="card">
+  <h3>Total Balance</h3>
+  <h1>$0.00</h1>
+  <small>BTC: 0.00000000</small>
+</div>
+
+<!-- ASSETS -->
+<div id="assetsPage">
+  <iframe src="coin.html"></iframe>
+</div>
+
+<!-- HISTORY -->
+<div id="historyPage" class="hidden">
+  <div class="card">
+    <h3>Transaction History</h3>
+    <p>No records</p>
+  </div>
+</div>
+
+</div>
+
+<script>
+const drawer=document.getElementById("drawer");
+const profile=document.getElementById("profile");
+const assetsPage=document.getElementById("assetsPage");
+const historyPage=document.getElementById("historyPage");
+
+function toggleDrawer(){
+  drawer.classList.toggle("open");
+  profile.style.display="none";
+}
+function toggleProfile(){
+  profile.style.display =
+    profile.style.display==="block"?"none":"block";
+  drawer.classList.remove("open");
+}
+function showAssets(){
+  assetsPage.classList.remove("hidden");
+  historyPage.classList.add("hidden");
+  tabAssets.classList.add("active");
+  tabHistory.classList.remove("active");
+}
+function showHistory(){
+  historyPage.classList.remove("hidden");
+  assetsPage.classList.add("hidden");
+  tabHistory.classList.add("active");
+  tabAssets.classList.remove("active");
+}
+</script>
+
+</body>
 </html>
