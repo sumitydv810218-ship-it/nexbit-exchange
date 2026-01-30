@@ -1,1 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Coins</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<style>
+body{
+  margin:0;
+  background:#0b1220;
+  color:#fff;
+  font-family:Arial;
+}
+input{
+  width:95%;
+  margin:10px;
+  padding:10px;
+  border-radius:6px;
+  border:none;
+}
+.coin{
+  display:flex;
+  justify-content:space-between;
+  padding:12px;
+  border-bottom:1px solid #1d2b55;
+}
+.up{color:#22c55e}
+.down{color:#ef4444}
+</style>
+</head>
+
+<body>
+
+<input placeholder="Search coin..." onkeyup="search(this.value)">
+
+<div id="list"></div>
+
+<script>
+const coins=["bitcoin","ethereum","tether","binancecoin","solana"];
+let old={};
+
+async function load(){
+ const r=await fetch(
+  "https://api.coingecko.com/api/v3/simple/price?ids="+
+  coins.join(",")+"&vs_currencies=usd"
+ );
+ const d=await r.json();
+ const box=document.getElementById("list");
+ box.innerHTML="";
+ coins.forEach(c=>{
+  let p=d[c].usd;
+  let cls= old[c] && p>old[c] ? "up":"down";
+  box.innerHTML+=`
+   <div class="coin" data-name="${c}">
+     <span>${c.toUpperCase()}</span>
+     <span class="${cls}">$${p}</span>
+   </div>`;
+  old[c]=p;
+ });
+}
+function search(v){
+ document.querySelectorAll(".coin").forEach(e=>{
+  e.style.display=e.dataset.name.includes(v.toLowerCase())
+   ?"flex":"none";
+ });
+}
+load();
+setInterval(load,5000);
+</script>
+
+</body>
+  </html>
