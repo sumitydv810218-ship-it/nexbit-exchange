@@ -6,80 +6,104 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{margin:0;font-family:Arial;background:#0b1220;color:#fff}
-
+body{
+  margin:0;
+  background:#0b1220;
+  color:#fff;
+  font-family:Arial, sans-serif;
+}
 header{
-  background:#0f1c3f;
-  padding:12px 15px;
   display:flex;
   justify-content:space-between;
   align-items:center;
+  padding:15px;
 }
-
-.menu{font-size:22px;cursor:pointer}
-.profile{font-size:22px;cursor:pointer}
-
-#sidebar{
-  position:fixed;
-  top:0;
-  left:-260px;
-  width:260px;
-  height:100%;
-  background:#08132a;
-  padding-top:60px;
-  transition:.3s;
+.logo{
+  font-size:20px;
+  font-weight:bold;
+  color:#4da3ff;
 }
-#sidebar a{
-  display:block;
-  padding:14px;
-  color:#fff;
-  text-decoration:none;
+nav span{
+  margin:0 10px;
+  cursor:pointer;
 }
-#sidebar a:hover{background:#112255}
-
-main{padding:15px}
-
-iframe{
-  width:100%;
-  height:80vh;
+.card{
+  background:#111a2e;
+  margin:15px;
+  padding:20px;
+  border-radius:12px;
+}
+.btns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+button{
+  padding:12px;
   border:none;
-  background:#0b1220;
+  border-radius:8px;
+  font-weight:bold;
 }
+.deposit{background:#2f6bff;color:#fff;}
+.withdraw,.transfer,.swap{background:#fff;color:#000;}
+.hidden{display:none;}
 </style>
 </head>
 
 <body>
 
 <header>
-  <span class="menu" onclick="toggle()">☰</span>
-  <strong>Nexbit Dashboard</strong>
-  <span class="profile">👤</span>
+  <div class="logo">NEXBIT</div>
+  <nav>
+    <span onclick="openPage('assets')">Assets</span>
+    <span onclick="openPage('history')">History</span>
+  </nav>
+  <div onclick="goBack()">👤</div>
 </header>
 
-<div id="sidebar">
-  <a href="#" onclick="loadCoins()">Assets</a>
-  <a href="#" onclick="loadHistory()">History</a>
-  <a href="#">Deposit</a>
-  <a href="#">Withdraw</a>
-  <a href="index.html">Logout</a>
+<!-- ASSETS -->
+<div id="assets">
+  <div class="card">
+    <h2>Balance: $<span id="usd">5.66</span></h2>
+    <small>≈ <span id="btc">0.0000636158</span> BTC</small>
+
+    <div class="btns">
+      <button class="deposit" onclick="deposit()">Deposit</button>
+      <button class="withdraw">Withdraw</button>
+      <button class="transfer">Transfer</button>
+      <button class="swap">Swap</button>
+    </div>
+  </div>
+
+  <div class="card" onclick="location.href='coins.html'">
+    BTC · ETH · USDT · BNB →
+  </div>
 </div>
 
-<main id="content">
-  <iframe src="coin.html"></iframe>
-</main>
+<!-- HISTORY -->
+<div id="history" class="hidden">
+  <div class="card">
+    <h3>Transaction History</h3>
+    <p>No transactions</p>
+  </div>
+</div>
 
 <script>
-function toggle(){
-  const s=document.getElementById("sidebar");
-  s.style.left = s.style.left==="0px" ? "-260px" : "0px";
+let balance = 5.66;
+
+function openPage(page){
+  document.getElementById("assets").classList.add("hidden");
+  document.getElementById("history").classList.add("hidden");
+  document.getElementById(page).classList.remove("hidden");
 }
-function loadCoins(){
-  document.getElementById("content").innerHTML =
-   '<iframe src="coin.html"></iframe>';
+
+function goBack(){
+  openPage('assets');
 }
-function loadHistory(){
-  document.getElementById("content").innerHTML =
-   "<h3>No transaction history</h3>";
+
+function deposit(){
+  balance += 1;
+  document.getElementById("usd").innerText = balance.toFixed(2);
 }
 </script>
 
