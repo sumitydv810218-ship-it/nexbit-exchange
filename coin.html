@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nexbit Markets</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#0b132b;
+  color:#fff;
+}
+
+header{
+  padding:14px;
+  font-size:20px;
+  font-weight:bold;
+}
+
+#search{
+  width:92%;
+  margin:10px auto;
+  display:block;
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  outline:none;
+  font-size:15px;
+}
+
+.coin{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px;
+  border-bottom:1px solid #1c2541;
+  cursor:pointer;
+}
+
+.coin img{
+  width:32px;
+  height:32px;
+}
+
+.coin-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.price{
+  font-weight:bold;
+}
+
+.green{
+  color:#00ff9d;
+  animation: flashGreen .5s;
+}
+
+.red{
+  color:#ff4d4d;
+  animation: flashRed .5s;
+}
+
+@keyframes flashGreen{
+  from{background:#003d2e;}
+  to{background:transparent;}
+}
+@keyframes flashRed{
+  from{background:#3d0000;}
+  to{background:transparent;}
+}
+
+/* BOTTOM POPUP */
+#popup{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#1c2541;
+  padding:20px;
+  display:none;
+  border-radius:18px 18px 0 0;
+  z-index:99;
+}
+
+.actions button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.deposit{background:#00ff9d;color:#000}
+.withdraw{background:#ff4d4d}
+.trade{background:#5bc0eb;color:#000}
+.details{background:#f4d35e;color:#000}
+.close{background:#333;color:#fff}
+</style>
+</head>
+
+<body>
+
+<header>Nexbit Markets</header>
+
+<input id="search" placeholder="Search coin..." />
+
+<div id="coinList"></div>
+
+<!-- POPUP -->
+<div id="popup">
+  <h3 id="coinName"></h3>
+  <div class="actions">
+    <button class="deposit">Deposit</button>
+    <button class="withdraw">Withdraw</button>
+    <button class="trade">Trade</button>
+    <button class="details">Details</button>
+    <button class="close" onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+<script>
+let allCoins = [];
+let lastPrice = {};
+
+async function loadCoins(){
+  try{
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1"
+    );
+    allCoins = await res.json();
+    renderCoins(allCoins);
+  }catch(e){}
+}
+
+function renderCoins(coins){
+  const list = document.getElementById("coinList");
+  list.innerHTML = "";
+
+  coins.forEach(c=>{
+    let cls = "";
+    if(lastPrice[c.id]){
+      cls = c.current_price > lastPrice[c.id] ? "green" : "red";
+    }
+    lastPrice[c.id] = c.current_price;
+
+    const div = document.createElement("div");
+    div.className="coin";
+    div.onclick=()=>openCoin(c);
+
+    div.innerHTML = `
+      <div class="coin-left">
+        <img src="${c.image}">
+        <div>
+          <div>${c.name}</div>
+          <small>${c.symbol.toUpperCase()}</small>
+        </div>
+      </div>
+      <div class="price ${cls}">$${c.current_price}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+document.getElementById("search").oninput = e=>{
+  const v = e.target.value.toLowerCase();
+  renderCoins(
+    allCoins.filter(c =>
+      c.name.toLowerCase().includes(v) ||
+      c.symbol.toLowerCase().includes(v)
+    )
+  );
+};
+
+function openCoin(c){
+  document.getElementById("coinName").innerText =
+    `${c.name} (${c.symbol.toUpperCase()})`;
+  document.getElementById("popup").style.display="block";
+}
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+loadCoins();
+setInterval(loadCoins, 10000);
+</script>
+
+</body>
+</html>
