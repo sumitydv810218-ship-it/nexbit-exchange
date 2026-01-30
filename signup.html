@@ -1,1 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Nexbit | Sign Up</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#0b1220;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+}
+.card{
+  background:#121c3b;
+  padding:25px;
+  border-radius:12px;
+  width:100%;
+  max-width:360px;
+}
+h2{text-align:center;margin-bottom:20px}
+input{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:8px;
+  outline:none;
+}
+button{
+  width:100%;
+  padding:12px;
+  background:#4da3ff;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
+  color:#fff;
+}
+small{
+  display:block;
+  text-align:center;
+  margin-top:15px;
+}
+a{color:#4da3ff;text-decoration:none}
+.error{color:#ff6b6b;text-align:center}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>Create Account</h2>
+
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+
+  <button onclick="signup()">Sign Up</button>
+
+  <p class="error" id="err"></p>
+
+  <small>
+    Already have an account?
+    <a href="login.html">Login</a>
+  </small>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDR2XkDg6UA19ZdjSqK3fCZiUCNn0c3Me8",
+  authDomain: "nexbit-exchange.firebaseapp.com",
+  projectId: "nexbit-exchange"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+window.signup = () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const err = document.getElementById("err");
+
+  err.innerText = "";
+
+  if(!email || !password){
+    err.innerText = "Fill all fields";
+    return;
+  }
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      location.href = "index.html";
+    })
+    .catch(e => {
+      err.innerText = e.message;
+    });
+};
+</script>
+
+</body>
+</html>
