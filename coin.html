@@ -6,94 +6,60 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-  margin:0;font-family:Arial;
-  background:#0b132b;color:#fff
-}
-#search{
-  width:95%;margin:10px auto;
-  padding:12px;border:none;
-  border-radius:8px;display:block
+body{margin:0;background:#0b1220;color:#fff;font-family:Arial}
+input{
+  width:95%;margin:10px;padding:10px;border-radius:6px;border:none
 }
 .coin{
   display:flex;justify-content:space-between;
-  padding:12px;border-bottom:1px solid #1c2541;
-  cursor:pointer
+  padding:14px;border-bottom:1px solid #1d2b55
 }
-.left{display:flex;gap:10px;align-items:center}
-.coin img{width:28px}
-.green{color:#00ff9d}
-.red{color:#ff4d4d}
-
-/* popup */
-#popup{
-  position:fixed;bottom:0;left:0;right:0;
-  background:#1c2541;padding:20px;
-  display:none;border-radius:20px 20px 0 0
-}
-button{
-  width:100%;padding:12px;margin-top:8px;
-  border:none;border-radius:10px;cursor:pointer
-}
+.price.up{color:#00ff99}
+.price.down{color:#ff5c5c}
 </style>
 </head>
 
 <body>
 
-<input id="search" placeholder="Search coin">
+<input placeholder="Search coin" onkeyup="filterCoins(this.value)">
 
-<div id="list"></div>
-
-<div id="popup">
-  <h3 id="pname"></h3>
-  <button>Deposit</button>
-  <button>Withdraw</button>
-  <button>Trade</button>
-  <button onclick="closePop()">Close</button>
-</div>
+<div id="coins"></div>
 
 <script>
-let coins=[],old={};
+const list=[
+"bitcoin","ethereum","tether","binancecoin","ripple",
+"usd-coin","solana","tron","staked-ether","dogecoin"
+];
+
+let last={};
 
 async function load(){
-  const r=await fetch(
-   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=300&page=1"
-  );
-  coins=await r.json();
-  render(coins.slice(0,10));
+ const res=await fetch(
+  "https://api.coingecko.com/api/v3/simple/price?ids="+
+  list.join(",")+"&vs_currencies=usd"
+ );
+ const data=await res.json();
+ const box=document.getElementById("coins");
+ box.innerHTML="";
+ list.forEach(id=>{
+  const p=data[id].usd;
+  const up = last[id] && p>last[id];
+  box.innerHTML+=`
+   <div class="coin" data-name="${id}">
+    <span>${id.toUpperCase()}</span>
+    <span class="price ${up?'up':'down'}">$${p}</span>
+   </div>`;
+  last[id]=p;
+ });
 }
-function render(arr){
-  list.innerHTML="";
-  arr.forEach(c=>{
-    let cls="";
-    if(old[c.id]) cls=c.current_price>old[c.id]?"green":"red";
-    old[c.id]=c.current_price;
-    const d=document.createElement("div");
-    d.className="coin";
-    d.onclick=()=>openPop(c);
-    d.innerHTML=`
-      <div class="left">
-        <img src="${c.image}">
-        <div>${c.name}<br><small>${c.symbol.toUpperCase()}</small></div>
-      </div>
-      <div class="${cls}">$${c.current_price}</div>
-    `;
-    list.appendChild(d);
-  });
+function filterCoins(v){
+ document.querySelectorAll(".coin").forEach(c=>{
+  c.style.display=c.dataset.name.includes(v.toLowerCase())?"flex":"none";
+ });
 }
-search.oninput=e=>{
-  const v=e.target.value.toLowerCase();
-  render(coins.filter(c=>c.name.toLowerCase().includes(v)||c.symbol.includes(v)));
-}
-function openPop(c){
-  pname.innerText=`${c.name} (${c.symbol.toUpperCase()})`;
-  popup.style.display="block";
-}
-function closePop(){popup.style.display="none"}
-
 load();
-setInterval(load,10000);
+setInterval(load,5000);
 </script>
 
 </body>
-  </html>
+</html>
