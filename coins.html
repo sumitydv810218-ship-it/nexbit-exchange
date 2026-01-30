@@ -2,144 +2,192 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Coins</title>
+<title>Nexbit Markets</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
   margin:0;
-  font-family:Arial;
-  background:#0b1220;
+  font-family: Arial, sans-serif;
+  background:#0b132b;
   color:#fff;
 }
-.search{
-  padding:10px;
+
+header{
+  padding:14px;
+  font-size:20px;
+  font-weight:bold;
 }
-.search input{
-  width:100%;
-  padding:10px;
+
+#search{
+  width:92%;
+  margin:10px auto;
+  display:block;
+  padding:12px;
   border-radius:8px;
   border:none;
   outline:none;
+  font-size:15px;
 }
+
 .coin{
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   padding:12px;
-  border-bottom:1px solid #1b2a5a;
+  border-bottom:1px solid #1c2541;
   cursor:pointer;
 }
+
+.coin img{
+  width:32px;
+  height:32px;
+}
+
 .coin-left{
   display:flex;
-  gap:10px;
   align-items:center;
-}
-.coin img{
-  width:26px;
-  height:26px;
-}
-.price.up{color:#2ecc71; animation:flash 0.4s}
-.price.down{color:#e74c3c; animation:flash 0.4s}
-
-@keyframes flash{
-  from{opacity:0.3}
-  to{opacity:1}
+  gap:10px;
 }
 
-.actions{
+.price{
+  font-weight:bold;
+}
+
+.green{
+  color:#00ff9d;
+  animation: flashGreen .5s;
+}
+
+.red{
+  color:#ff4d4d;
+  animation: flashRed .5s;
+}
+
+@keyframes flashGreen{
+  from{background:#003d2e;}
+  to{background:transparent;}
+}
+@keyframes flashRed{
+  from{background:#3d0000;}
+  to{background:transparent;}
+}
+
+/* BOTTOM POPUP */
+#popup{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#1c2541;
+  padding:20px;
   display:none;
-  background:#121c3b;
-  padding:10px;
+  border-radius:18px 18px 0 0;
+  z-index:99;
 }
+
 .actions button{
   width:100%;
-  margin:5px 0;
-  padding:8px;
+  padding:12px;
+  margin-top:10px;
   border:none;
-  border-radius:6px;
-  background:#1b2a5a;
-  color:#fff;
+  border-radius:10px;
+  font-size:15px;
+  cursor:pointer;
 }
+
+.deposit{background:#00ff9d;color:#000}
+.withdraw{background:#ff4d4d}
+.trade{background:#5bc0eb;color:#000}
+.details{background:#f4d35e;color:#000}
+.close{background:#333;color:#fff}
 </style>
 </head>
 
 <body>
 
-<div class="search">
-  <input id="search" placeholder="Search coin...">
-</div>
+<header>Nexbit Markets</header>
+
+<input id="search" placeholder="Search coin..." />
 
 <div id="coinList"></div>
 
-<script>
-let lastPrice = {};
-let allCoins = [];
+<!-- POPUP -->
+<div id="popup">
+  <h3 id="coinName"></h3>
+  <div class="actions">
+    <button class="deposit">Deposit</button>
+    <button class="withdraw">Withdraw</button>
+    <button class="trade">Trade</button>
+    <button class="details">Details</button>
+    <button class="close" onclick="closePopup()">Close</button>
+  </div>
+</div>
 
-// Load 300+ coins
-async function fetchCoins(){
-  const url =
-   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=300&page=1&sparkline=false";
-  const res = await fetch(url);
-  allCoins = await res.json();
-  renderCoins(allCoins.slice(0,10)); // default 10
+<script>
+let allCoins = [];
+let lastPrice = {};
+
+async function loadCoins(){
+  try{
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1"
+    );
+    allCoins = await res.json();
+    renderCoins(allCoins);
+  }catch(e){}
 }
 
-function renderCoins(data){
+function renderCoins(coins){
   const list = document.getElementById("coinList");
   list.innerHTML = "";
 
-  data.forEach(c=>{
-    let dir = "";
+  coins.forEach(c=>{
+    let cls = "";
     if(lastPrice[c.id]){
-      dir = c.current_price > lastPrice[c.id] ? "up" : "down";
+      cls = c.current_price > lastPrice[c.id] ? "green" : "red";
     }
     lastPrice[c.id] = c.current_price;
 
     const div = document.createElement("div");
-    div.innerHTML = `
-      <div class="coin" onclick="toggle('${c.id}')">
-        <div class="coin-left">
-          <img src="${c.image}">
-          <div>
-            <strong>${c.symbol.toUpperCase()}</strong><br>
-            <small>${c.name}</small>
-          </div>
-        </div>
-        <div class="price ${dir}">$${c.current_price}</div>
-      </div>
+    div.className="coin";
+    div.onclick=()=>openCoin(c);
 
-      <div class="actions" id="a_${c.id}">
-        <button>Deposit</button>
-        <button>Withdraw</button>
-        <button>Transfer</button>
-        <button>Trade</button>
+    div.innerHTML = `
+      <div class="coin-left">
+        <img src="${c.image}">
+        <div>
+          <div>${c.name}</div>
+          <small>${c.symbol.toUpperCase()}</small>
+        </div>
       </div>
+      <div class="price ${cls}">$${c.current_price}</div>
     `;
     list.appendChild(div);
   });
 }
 
-function toggle(id){
-  const el = document.getElementById("a_"+id);
-  el.style.display = el.style.display==="block"?"none":"block";
-}
-
 document.getElementById("search").oninput = e=>{
   const v = e.target.value.toLowerCase();
-  if(!v){
-    renderCoins(allCoins.slice(0,10));
-    return;
-  }
-  const filtered = allCoins.filter(c =>
-    c.name.toLowerCase().includes(v) ||
-    c.symbol.toLowerCase().includes(v)
+  renderCoins(
+    allCoins.filter(c =>
+      c.name.toLowerCase().includes(v) ||
+      c.symbol.toLowerCase().includes(v)
+    )
   );
-  renderCoins(filtered);
 };
 
-fetchCoins();
-setInterval(fetchCoins, 15000);
+function openCoin(c){
+  document.getElementById("coinName").innerText =
+    `${c.name} (${c.symbol.toUpperCase()})`;
+  document.getElementById("popup").style.display="block";
+}
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+
+loadCoins();
+setInterval(loadCoins, 10000);
 </script>
 
 </body>
